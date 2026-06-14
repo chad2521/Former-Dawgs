@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,7 +14,65 @@
 		1A2B3C4D5E6F708190A0B0C5 /* StoriesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A5 /* StoriesService.swift */; };
 		1A2B3C4D5E6F708190A0B0C6 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A6 /* DashboardViewModel.swift */; };
 		1A2B3C4D5E6F708190A0B0C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A8 /* Assets.xcassets */; };
+		7E47326E2FB4A42D003CB8BE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47326D2FB4A42C003CB8BE /* Theme.swift */; };
+		7E4732702FB4A42F003CB8BE /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47326F2FB4A42F003CB8BE /* SharedComponents.swift */; };
+		7E4732722FB4A430003CB8BE /* PlayerSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4732712FB4A430003CB8BE /* PlayerSelectorView.swift */; };
+		7E4732742FB4A431003CB8BE /* HomeSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4732732FB4A431003CB8BE /* HomeSections.swift */; };
+		7E4732762FB4A434003CB8BE /* PlayerSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4732752FB4A434003CB8BE /* PlayerSections.swift */; };
+		7E4732782FB4A436003CB8BE /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4732772FB4A436003CB8BE /* HomeScreen.swift */; };
+		7E47327A2FB4A437003CB8BE /* PlayerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4732792FB4A437003CB8BE /* PlayerScreen.swift */; };
+		7E47327C2FB4A438003CB8BE /* TriviaScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47327B2FB4A438003CB8BE /* TriviaScreen.swift */; };
+		7EA237152FDF23CF008DB35A /* DawgLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA237142FDF23CF008DB35A /* DawgLiveActivityManager.swift */; };
+		7EA2371B2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA2371A2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift */; };
+		7EBAEFB22FC892E300AC5595 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EBAEFB12FC892E300AC5595 /* WidgetKit.framework */; };
+		7EBAEFB42FC892E300AC5595 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EBAEFB32FC892E300AC5595 /* SwiftUI.framework */; };
+		7EBAEFC52FC892E400AC5595 /* KonnorDailyWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7EBAEFAF2FC892E300AC5595 /* KonnorDailyWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7EBAEFD02FC892E400AC5595 /* PlayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A3 /* PlayerModels.swift */; };
+		7EBAEFEC2FCA09BB00AC5595 /* KonnorDailyAppIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EBAEFEB2FCA09BA00AC5595 /* KonnorDailyAppIntents.swift */; };
+		7EF0A0012FCA100000000001 /* KonnorDailyWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 7EF0A0022FCA100000000002 /* KonnorDailyWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7EBAEFC32FC892E400AC5595 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A2B3C4D5E6F708190A0B010 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7EBAEFAE2FC892E300AC5595;
+			remoteInfo = KonnorDailyWidgetExtension;
+		};
+		7EF0A0032FCA100000000003 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A2B3C4D5E6F708190A0B010 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7EF0A0042FCA100000000004;
+			remoteInfo = "KonnorDailyWatch Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7EBAEFC62FC892E400AC5595 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				7EBAEFC52FC892E400AC5595 /* KonnorDailyWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EF0A0052FCA100000000005 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				7EF0A0012FCA100000000001 /* KonnorDailyWatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1A2B3C4D5E6F708190A0B001 /* KonnorDaily.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KonnorDaily.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -26,10 +84,56 @@
 		1A2B3C4D5E6F708190A0B0A6 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F708190A0B0A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1A2B3C4D5E6F708190A0B0A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7E47326D2FB4A42C003CB8BE /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		7E47326F2FB4A42F003CB8BE /* SharedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedComponents.swift; sourceTree = "<group>"; };
+		7E4732712FB4A430003CB8BE /* PlayerSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSelectorView.swift; sourceTree = "<group>"; };
+		7E4732732FB4A431003CB8BE /* HomeSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSections.swift; sourceTree = "<group>"; };
+		7E4732752FB4A434003CB8BE /* PlayerSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSections.swift; sourceTree = "<group>"; };
+		7E4732772FB4A436003CB8BE /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		7E4732792FB4A437003CB8BE /* PlayerScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerScreen.swift; sourceTree = "<group>"; };
+		7E47327B2FB4A438003CB8BE /* TriviaScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriviaScreen.swift; sourceTree = "<group>"; };
+		7EA237142FDF23CF008DB35A /* DawgLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DawgLiveActivityManager.swift; sourceTree = "<group>"; };
+		7EA2371A2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshScheduler.swift; sourceTree = "<group>"; };
+		7EBAEFAF2FC892E300AC5595 /* KonnorDailyWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KonnorDailyWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EBAEFB12FC892E300AC5595 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		7EBAEFB32FC892E300AC5595 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		7EBAEFEB2FCA09BA00AC5595 /* KonnorDailyAppIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KonnorDailyAppIntents.swift; sourceTree = "<group>"; };
+		7EF0A0022FCA100000000002 /* KonnorDailyWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KonnorDailyWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7EBAEFC92FC892E400AC5595 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 7EBAEFAE2FC892E300AC5595 /* KonnorDailyWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		7EBAEFB52FC892E300AC5595 /* KonnorDailyWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (7EBAEFC92FC892E400AC5595 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = KonnorDailyWidget; sourceTree = "<group>"; };
+		7EF0A0062FCA100000000006 /* KonnorDailyWatch Watch App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "KonnorDailyWatch Watch App"; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		1A2B3C4D5E6F708190A0B002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EBAEFAC2FC892E300AC5595 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EBAEFB42FC892E300AC5595 /* SwiftUI.framework in Frameworks */,
+				7EBAEFB22FC892E300AC5595 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EF0A00A2FCA10000000000A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -43,6 +147,9 @@
 			isa = PBXGroup;
 			children = (
 				1A2B3C4D5E6F708190A0B004 /* KonnorDaily */,
+				7EBAEFB52FC892E300AC5595 /* KonnorDailyWidget */,
+				7EF0A0062FCA100000000006 /* KonnorDailyWatch Watch App */,
+				7EBAEFB02FC892E300AC5595 /* Frameworks */,
 				1A2B3C4D5E6F708190A0B005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -58,6 +165,17 @@
 				1A2B3C4D5E6F708190A0B0A6 /* DashboardViewModel.swift */,
 				1A2B3C4D5E6F708190A0B0A7 /* Info.plist */,
 				1A2B3C4D5E6F708190A0B0A8 /* Assets.xcassets */,
+				7E47326D2FB4A42C003CB8BE /* Theme.swift */,
+				7E47326F2FB4A42F003CB8BE /* SharedComponents.swift */,
+				7E4732712FB4A430003CB8BE /* PlayerSelectorView.swift */,
+				7E4732732FB4A431003CB8BE /* HomeSections.swift */,
+				7E4732752FB4A434003CB8BE /* PlayerSections.swift */,
+				7E4732772FB4A436003CB8BE /* HomeScreen.swift */,
+				7E4732792FB4A437003CB8BE /* PlayerScreen.swift */,
+				7E47327B2FB4A438003CB8BE /* TriviaScreen.swift */,
+				7EBAEFEB2FCA09BA00AC5595 /* KonnorDailyAppIntents.swift */,
+				7EA237142FDF23CF008DB35A /* DawgLiveActivityManager.swift */,
+				7EA2371A2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift */,
 			);
 			path = KonnorDaily;
 			sourceTree = "<group>";
@@ -66,8 +184,19 @@
 			isa = PBXGroup;
 			children = (
 				1A2B3C4D5E6F708190A0B001 /* KonnorDaily.app */,
+				7EBAEFAF2FC892E300AC5595 /* KonnorDailyWidgetExtension.appex */,
+				7EF0A0022FCA100000000002 /* KonnorDailyWatch Watch App.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7EBAEFB02FC892E300AC5595 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7EBAEFB12FC892E300AC5595 /* WidgetKit.framework */,
+				7EBAEFB32FC892E300AC5595 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -80,14 +209,62 @@
 				1A2B3C4D5E6F708190A0B008 /* Sources */,
 				1A2B3C4D5E6F708190A0B002 /* Frameworks */,
 				1A2B3C4D5E6F708190A0B009 /* Resources */,
+				7EBAEFC62FC892E400AC5595 /* Embed Foundation Extensions */,
+				7EF0A0052FCA100000000005 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7EBAEFC42FC892E400AC5595 /* PBXTargetDependency */,
+				7EF0A0072FCA100000000007 /* PBXTargetDependency */,
+			);
+			name = KonnorDaily;
+			productName = KonnorDaily;
+			productReference = 1A2B3C4D5E6F708190A0B001 /* KonnorDaily.app */;
+			productType = "com.apple.product-type.application";
+		};
+		7EBAEFAE2FC892E300AC5595 /* KonnorDailyWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EBAEFCA2FC892E400AC5595 /* Build configuration list for PBXNativeTarget "KonnorDailyWidgetExtension" */;
+			buildPhases = (
+				7EBAEFAB2FC892E300AC5595 /* Sources */,
+				7EBAEFAC2FC892E300AC5595 /* Frameworks */,
+				7EBAEFAD2FC892E300AC5595 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = KonnorDaily;
-			productName = KonnorDaily;
-			productReference = 1A2B3C4D5E6F708190A0B001 /* KonnorDaily.app */;
+			fileSystemSynchronizedGroups = (
+				7EBAEFB52FC892E300AC5595 /* KonnorDailyWidget */,
+			);
+			name = KonnorDailyWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = KonnorDailyWidgetExtension;
+			productReference = 7EBAEFAF2FC892E300AC5595 /* KonnorDailyWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		7EF0A0042FCA100000000004 /* KonnorDailyWatch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EF0A0082FCA100000000008 /* Build configuration list for PBXNativeTarget "KonnorDailyWatch Watch App" */;
+			buildPhases = (
+				7EF0A0092FCA100000000009 /* Sources */,
+				7EF0A00A2FCA10000000000A /* Frameworks */,
+				7EF0A00B2FCA10000000000B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				7EF0A0062FCA100000000006 /* KonnorDailyWatch Watch App */,
+			);
+			name = "KonnorDailyWatch Watch App";
+			packageProductDependencies = (
+			);
+			productName = "KonnorDailyWatch Watch App";
+			productReference = 7EF0A0022FCA100000000002 /* KonnorDailyWatch Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -97,11 +274,36 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1530;
-				LastUpgradeCheck = 2640;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					1A2B3C4D5E6F708190A0B006 = {
 						CreatedOnToolsVersion = 15.3;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+							com.apple.GameCenter = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 1;
+							};
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
+					};
+					7EBAEFAE2FC892E300AC5595 = {
+						CreatedOnToolsVersion = 26.5;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
+					};
+					7EF0A0042FCA100000000004 = {
+						CreatedOnToolsVersion = 26.5;
 					};
 				};
 			};
@@ -119,6 +321,8 @@
 			projectRoot = "";
 			targets = (
 				1A2B3C4D5E6F708190A0B006 /* KonnorDaily */,
+				7EBAEFAE2FC892E300AC5595 /* KonnorDailyWidgetExtension */,
+				7EF0A0042FCA100000000004 /* KonnorDailyWatch Watch App */,
 			);
 		};
 /* End PBXProject section */
@@ -132,6 +336,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7EBAEFAD2FC892E300AC5595 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EF0A00B2FCA10000000000B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -141,14 +359,53 @@
 			files = (
 				1A2B3C4D5E6F708190A0B0C1 /* KonnorDailyApp.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C2 /* ContentView.swift in Sources */,
+				7E4732742FB4A431003CB8BE /* HomeSections.swift in Sources */,
+				7EA237152FDF23CF008DB35A /* DawgLiveActivityManager.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C3 /* PlayerModels.swift in Sources */,
+				7E47327A2FB4A437003CB8BE /* PlayerScreen.swift in Sources */,
+				7E4732762FB4A434003CB8BE /* PlayerSections.swift in Sources */,
+				7E4732722FB4A430003CB8BE /* PlayerSelectorView.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C4 /* PlayerService.swift in Sources */,
+				7E47327C2FB4A438003CB8BE /* TriviaScreen.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C5 /* StoriesService.swift in Sources */,
+				7E4732782FB4A436003CB8BE /* HomeScreen.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C6 /* DashboardViewModel.swift in Sources */,
+				7E4732702FB4A42F003CB8BE /* SharedComponents.swift in Sources */,
+				7EBAEFEC2FCA09BB00AC5595 /* KonnorDailyAppIntents.swift in Sources */,
+				7E47326E2FB4A42D003CB8BE /* Theme.swift in Sources */,
+				7EA2371B2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EBAEFAB2FC892E300AC5595 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EBAEFD02FC892E400AC5595 /* PlayerModels.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EF0A0092FCA100000000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7EBAEFC42FC892E400AC5595 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7EBAEFAE2FC892E300AC5595 /* KonnorDailyWidgetExtension */;
+			targetProxy = 7EBAEFC32FC892E400AC5595 /* PBXContainerItemProxy */;
+		};
+		7EF0A0072FCA100000000007 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7EF0A0042FCA100000000004 /* KonnorDailyWatch Watch App */;
+			targetProxy = 7EF0A0032FCA100000000003 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1A2B3C4D5E6F708190A0B012 /* Debug */ = {
@@ -275,8 +532,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = KonnorDaily/KonnorDaily.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = KonnorDaily/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Former Dawgs";
@@ -290,7 +548,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -307,8 +565,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = KonnorDaily/KonnorDaily.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = KonnorDaily/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Former Dawgs";
@@ -322,7 +581,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -331,6 +590,129 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		7EBAEFC72FC892E400AC5595 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = KonnorDailyWidget/KonnorDailyWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KonnorDailyWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KonnorDailyWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.KonnorDailyWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7EBAEFC82FC892E400AC5595 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = KonnorDailyWidget/KonnorDailyWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KonnorDailyWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KonnorDailyWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.KonnorDailyWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		7EF0A00C2FCA10000000000C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = KonnorDailyWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.cwdawg.formerdawgs;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		7EF0A00D2FCA10000000000D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = KonnorDailyWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.cwdawg.formerdawgs;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Release;
 		};
@@ -351,6 +733,24 @@
 			buildConfigurations = (
 				1A2B3C4D5E6F708190A0B012 /* Debug */,
 				1A2B3C4D5E6F708190A0B013 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7EBAEFCA2FC892E400AC5595 /* Build configuration list for PBXNativeTarget "KonnorDailyWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EBAEFC72FC892E400AC5595 /* Debug */,
+				7EBAEFC82FC892E400AC5595 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7EF0A0082FCA100000000008 /* Build configuration list for PBXNativeTarget "KonnorDailyWatch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EF0A00C2FCA10000000000C /* Debug */,
+				7EF0A00D2FCA10000000000D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

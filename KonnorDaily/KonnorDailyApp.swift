@@ -2,12 +2,25 @@ import SwiftUI
 
 @main
 struct KonnorDailyApp: App {
-    @AppStorage("appearanceMode") private var appearanceMode = AppearanceMode.system.rawValue
+    init() {
+        CloudSyncStore.syncFromCloud()
+        CloudSyncStore.startObserving()
+        let question = TriviaCatalog.dailyQuestion(for: Date())
+        let instance = TriviaCatalog.instance(for: question)
+        CloudSyncStore.pushTodayTrivia(
+            prompt: question.prompt,
+            choices: instance.choices,
+            answer: question.answer,
+            category: question.category
+        )
+        BackgroundRefreshScheduler.shared.register()
+        BackgroundRefreshScheduler.shared.schedule()
+        Task { await DawgPushNotifier.shared.requestPermission() }
+    }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .preferredColorScheme(AppearanceMode(rawValue: appearanceMode)?.colorScheme)
         }
         .defaultSize(width: 980, height: 1280)
     }

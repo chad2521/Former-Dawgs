@@ -15,27 +15,35 @@ final class StoriesService: NSObject, XMLParserDelegate {
         return formatter
     }()
 
-    func fetchStories(for player: PlayerCatalogEntry) async throws -> [Story] {
-        let items = try await fetchMergedFeedItems(queries: storyQueries(for: player))
-        return items.map { item in
-            Story(
-                title: item.title,
-                source: item.source,
-                publishedText: item.publishedText,
-                url: item.url
-            )
+    func fetchStories(for player: PlayerCatalogEntry) async -> [Story] {
+        do {
+            let items = try await fetchMergedFeedItems(queries: storyQueries(for: player))
+            return items.map { item in
+                Story(
+                    title: item.title,
+                    source: item.source,
+                    publishedText: item.publishedText,
+                    url: item.url
+                )
+            }
+        } catch {
+            return []
         }
     }
 
-    func fetchHighlights(for player: PlayerCatalogEntry) async throws -> [HighlightVideo] {
-        let items = try await fetchMergedFeedItems(queries: highlightQueries(for: player))
-        return items.map { item in
-            HighlightVideo(
-                title: item.title,
-                source: item.source,
-                publishedText: item.publishedText,
-                url: item.url
-            )
+    func fetchHighlights(for player: PlayerCatalogEntry) async -> [HighlightVideo] {
+        do {
+            let items = try await fetchMergedFeedItems(queries: highlightQueries(for: player))
+            return items.map { item in
+                HighlightVideo(
+                    title: item.title,
+                    source: item.source,
+                    publishedText: item.publishedText,
+                    url: item.url
+                )
+            }
+        } catch {
+            return []
         }
     }
 
@@ -144,37 +152,10 @@ final class StoriesService: NSObject, XMLParserDelegate {
     }
 
     private func context(for player: PlayerCatalogEntry) -> String {
-        if player.id == 804606 {
-            return "Pirates"
-        }
-
-        if player.id == 828098 {
-            return "Blue Jays"
-        }
-
         return "Mississippi State"
     }
 
     private func storyQueries(for player: PlayerCatalogEntry) -> [String] {
-        if player.id == 804606 {
-            return [
-                "\"Konnor Griffin\" Pirates",
-                "\"Konnor Griffin\" MLB",
-                "\"Konnor Griffin\" \"Pittsburgh Pirates\"",
-                "\"Konnor Griffin\" \"MLB.com\"",
-                "\"Konnor Griffin\" \"MLB Pipeline\"",
-                "\"Konnor Griffin\" baseball"
-            ]
-        }
-
-        if player.id == 828098 {
-            return [
-                "\"JoJo Parker\" \"Blue Jays\"",
-                "\"JoJo Parker\" Dunedin",
-                "\"JoJo Parker\" baseball"
-            ]
-        }
-
         return [
             "\"\(player.displayName)\" \"\(context(for: player))\" baseball",
             "\"\(player.displayName)\" MiLB",
