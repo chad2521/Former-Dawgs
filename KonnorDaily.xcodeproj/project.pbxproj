@@ -15,6 +15,12 @@
 		1A2B3C4D5E6F708190A0B0C6 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A6 /* DashboardViewModel.swift */; };
 		1A2B3C4D5E6F708190A0B0C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A8 /* Assets.xcassets */; };
 		7E38EDB22FF4A16B00EF0B00 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */; };
+		7E0D50012A11000100000001 /* GameDayScheduleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0D50012A110001000000A1 /* GameDayScheduleService.swift */; };
+		7E0D50012A11000100000002 /* GameDayScheduleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0D50012A110001000000A1 /* GameDayScheduleService.swift */; };
+		7E0D50012A11000100000003 /* GameDayScheduleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0D50012A110001000000A1 /* GameDayScheduleService.swift */; };
+		7E0D50012A11000100000004 /* PlayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A3 /* PlayerModels.swift */; };
+		7E0D50012A11000100000005 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */; };
+		7E0D50012A11000100000006 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */; };
 		7E3A77EA302AB0C100B3E49B /* YouTubeHighlightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E3A77E9302AB0C100B3E49B /* YouTubeHighlightService.swift */; };
 		7E47326E2FB4A42D003CB8BE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47326D2FB4A42C003CB8BE /* Theme.swift */; };
 		7E4732702FB4A42F003CB8BE /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47326F2FB4A42F003CB8BE /* SharedComponents.swift */; };
@@ -97,6 +103,7 @@
 		1A2B3C4D5E6F708190A0B0A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1A2B3C4D5E6F708190A0B0A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
+		7E0D50012A110001000000A1 /* GameDayScheduleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDayScheduleService.swift; sourceTree = "<group>"; };
 		7E3A77E9302AB0C100B3E49B /* YouTubeHighlightService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubeHighlightService.swift; sourceTree = "<group>"; };
 		7E47326D2FB4A42C003CB8BE /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		7E47326F2FB4A42F003CB8BE /* SharedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedComponents.swift; sourceTree = "<group>"; };
@@ -204,6 +211,7 @@
 				7EC87A612FEB780300AE0200 /* DynamicDrafteeStore.swift */,
 				7EC87A632FEB784200AE0200 /* DraftWatcher.swift */,
 				7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */,
+				7E0D50012A110001000000A1 /* GameDayScheduleService.swift */,
 				7E9712E32FF5E88400229F02 /* BrowseScreen.swift */,
 				7EF1A0012A0B0001000000A1 /* TonightScreen.swift */,
 				7EF4D0012A0E0001000000A1 /* StadiumFlyoverHero.swift */,
@@ -412,6 +420,7 @@
 				1A2B3C4D5E6F708190A0B0C5 /* StoriesService.swift in Sources */,
 				7E4732782FB4A436003CB8BE /* HomeScreen.swift in Sources */,
 				7E38EDB22FF4A16B00EF0B00 /* OfflineCache.swift in Sources */,
+				7E0D50012A11000100000001 /* GameDayScheduleService.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C6 /* DashboardViewModel.swift in Sources */,
 				7E4732702FB4A42F003CB8BE /* SharedComponents.swift in Sources */,
 				7EBAEFEC2FCA09BB00AC5595 /* KonnorDailyAppIntents.swift in Sources */,
@@ -430,6 +439,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				7EBAEFD02FC892E400AC5595 /* PlayerModels.swift in Sources */,
+				7E0D50012A11000100000002 /* GameDayScheduleService.swift in Sources */,
+				7E0D50012A11000100000005 /* OfflineCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,6 +448,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7E0D50012A11000100000004 /* PlayerModels.swift in Sources */,
+				7E0D50012A11000100000003 /* GameDayScheduleService.swift in Sources */,
+				7E0D50012A11000100000006 /* OfflineCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -37,6 +37,7 @@ final class BackgroundRefreshScheduler {
         let frequent = DawgLiveActivityManager.shared.hasActiveActivities
         schedule(preferFrequent: frequent)
         let operation = Task {
+            await GameDayScheduleService.refreshSharedSnapshots(force: true)
             await DawgPushNotifier.shared.runPoll()
             // Keep Dynamic Island / Live Activities current from the device when
             // remote ActivityKit push isn't wired (or between pushes).

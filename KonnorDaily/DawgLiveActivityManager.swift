@@ -150,24 +150,62 @@ final class DawgLiveActivityManager {
     /// Pull fresh dashboards for every tracked Live Activity and push content updates.
     /// Used by background refresh as a local stand-in when remote push isn't configured.
     func refreshAllActiveFromNetwork() async {
-        let activities = Activity<DawgLiveActivityAttributes>.activities
-        guard !activities.isEmpty else { return }
-
+        await GameDayScheduleService.refreshSharedSnapshots()
         let service = PlayerService()
+        let activities = Activity<DawgLiveActivityAttributes>.activities
+
         for activity in activities {
             let playerID = activity.attributes.playerID
             let player = PlayerCatalog.player(for: playerID)
-            guard let result = try? await service.fetchDashboardWithOrigin(for: player, forceRefresh: true) else {
+            guard let result = try? await service.fetchDashboardWithOrigin(
+                for: player,
+                forceRefresh: true,
+                options: .core
+            ) else {
                 continue
             }
             let dashboard = result.dashboard
             PlayerRuntimeStore.saveOverride(for: dashboard)
+            syncFollowedGame(dashboard, isFollowed: true)
+        }
 
-            if dashboard.todayGame?.state == .final {
+        let favoriteIDs = FavoritePlayerStore.ids(
+            from: SharedAppGroup.defaults.string(forKey: "favoritePlayerIDs") ?? ""
+        )
+        let snapshot = PlayerRuntimeStore.loadTodaysDawgsSnapshot()
+        for player in snapshot.players where player.isLive && favoriteIDs.contains(player.id) {
+            guard activeActivity(for: player.id) == nil else { continue }
+            let catalog = PlayerCatalog.player(for: player.id)
+            guard let result = try? await service.fetchDashboardWithOrigin(
+                for: catalog,
+                forceRefresh: true,
+                options: .core
+            ) else {
+                continue
+            }
+            PlayerRuntimeStore.saveOverride(for: result.dashboard)
+            syncFollowedGame(result.dashboard, isFollowed: true)
+        }
+    }
+
+    /// Start Live Activities for followed players when their game is live; end after final.
+    func syncFollowedGame(_ dashboard: PlayerDashboard, isFollowed: Bool) {
+        let existing = activeActivity(for: dashboard.catalogEntry.id)
+        switch dashboard.todayGame?.state {
+        case .final:
+            if existing != nil {
                 end(for: dashboard)
-            } else if dashboard.todayGame != nil {
+            }
+        case .live:
+            if isFollowed || existing != nil {
                 startOrUpdate(for: dashboard)
             }
+        case .scheduled:
+            if existing != nil {
+                startOrUpdate(for: dashboard)
+            }
+        case nil:
+            break
         }
     }
 

@@ -33,21 +33,14 @@ struct TodaysDawgsProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<TodaysDawgsEntry>) -> Void) {
-        let now = Date()
-        let entry = TodaysDawgsEntry(date: now, snapshot: PlayerRuntimeStore.loadTodaysDawgsSnapshot())
-        completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(60 * 20))))
-    }
-}
-
-extension TodaysDawgSnapshotPlayer {
-    init(id: Int, name: String, role: String, teamName: String, gameHeadline: String, statusText: String, isLive: Bool) {
-        self.id = id
-        self.name = name
-        self.role = role
-        self.teamName = teamName
-        self.gameHeadline = gameHeadline
-        self.statusText = statusText
-        self.isLive = isLive
+        Task {
+            await GameDayScheduleService.refreshSharedSnapshots()
+            let now = Date()
+            let snapshot = PlayerRuntimeStore.loadTodaysDawgsSnapshot()
+            let entry = TodaysDawgsEntry(date: now, snapshot: snapshot)
+            let interval: TimeInterval = snapshot.players.contains(where: \.isLive) ? 60 * 5 : 60 * 20
+            completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(interval))))
+        }
     }
 }
 
@@ -249,9 +242,13 @@ struct FavoritePlayerProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<FavoritePlayerEntry>) -> Void) {
-        let now = Date()
-        let entry = FavoritePlayerEntry(date: now, snapshot: PlayerRuntimeStore.loadFavoritePlayerSnapshot())
-        completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(60 * 30))))
+        Task {
+            await GameDayScheduleService.refreshSharedSnapshots()
+            let now = Date()
+            let entry = FavoritePlayerEntry(date: now, snapshot: PlayerRuntimeStore.loadFavoritePlayerSnapshot())
+            let interval: TimeInterval = entry.snapshot.player?.isActiveToday == true ? 60 * 10 : 60 * 30
+            completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(interval))))
+        }
     }
 }
 
@@ -462,9 +459,12 @@ struct NewsProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<NewsEntry>) -> Void) {
-        let now = Date()
-        let entry = NewsEntry(date: now, snapshot: PlayerRuntimeStore.loadNewsSnapshot())
-        completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(60 * 45))))
+        Task {
+            await GameDayScheduleService.refreshSharedSnapshots()
+            let now = Date()
+            let entry = NewsEntry(date: now, snapshot: PlayerRuntimeStore.loadNewsSnapshot())
+            completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(60 * 45))))
+        }
     }
 }
 

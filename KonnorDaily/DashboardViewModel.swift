@@ -108,8 +108,29 @@ final class HomeViewModel {
             isLoading = true
         }
 
+        let allPlayers = PlayerCatalog.players
+        let firstPlayers = service.firstPaintPlayers()
+        Task { await GameDayScheduleService.refreshSharedSnapshots() }
+
+        // First paint: favorites + tonight + MLB, skipping stories/highlights.
+        if firstPlayers.count < allPlayers.count {
+            let first = await service.fetchHomeSummaryDetailed(
+                players: firstPlayers,
+                forceRefresh: forceRefresh,
+                options: .core,
+                includeHomeStories: false,
+                persistSnapshots: false
+            )
+            guard requestID == refreshSequence else { return }
+            summary = mergeFirstPaint(first.summary, onto: summary)
+            isShowingCachedData = first.isStale
+            lastUpdated = Date()
+            isLoading = false
+            syncLiveActivities(from: first.summary)
+        }
+
         let loaded = await service.fetchHomeSummaryDetailed(
-            players: PlayerCatalog.players,
+            players: allPlayers,
             forceRefresh: forceRefresh
         )
         guard requestID == refreshSequence else { return }
@@ -118,23 +139,50 @@ final class HomeViewModel {
         isShowingCachedData = loaded.isStale
         lastUpdated = Date()
         isLoading = false
-
-        // Keep any tracked Live Activities in sync with the latest scoreboard pull.
-        for dashboard in loaded.summary.comparisonOptions {
-            guard DawgLiveActivityManager.shared.activeActivity(for: dashboard.catalogEntry.id) != nil else {
-                continue
-            }
-            if dashboard.todayGame?.state == .final {
-                DawgLiveActivityManager.shared.end(for: dashboard)
-            } else if dashboard.todayGame != nil {
-                DawgLiveActivityManager.shared.startOrUpdate(for: dashboard)
-            }
-        }
+        syncLiveActivities(from: loaded.summary)
 
 #if canImport(WidgetKit)
         WidgetCenter.shared.reloadTimelines(ofKind: "FormerDawgsTodaysDawgsWidget")
         WidgetCenter.shared.reloadTimelines(ofKind: "FormerDawgsFavoritePlayerWidget")
         WidgetCenter.shared.reloadTimelines(ofKind: "FormerDawgsNewsWidget")
 #endif
+    }
+
+    private func syncLiveActivities(from summary: FormerDawgsHomeSummary) {
+        let favoriteIDs = FavoritePlayerStore.ids(
+            from: SharedAppGroup.defaults.string(forKey: "favoritePlayerIDs") ?? ""
+        )
+        var seen = Set<Int>()
+        let boards = summary.tonightScoreboard + summary.favoritesWatchlist + summary.comparisonOptions
+        for dashboard in boards {
+            let id = dashboard.catalogEntry.id
+            guard seen.insert(id).inserted else { continue }
+            DawgLiveActivityManager.shared.syncFollowedGame(
+                dashboard,
+                isFollowed: favoriteIDs.contains(id)
+            )
+        }
+    }
+
+    /// Keep cached hottest/headlines/leaders on screen while the first paint only has tonight + favorites.
+    private func mergeFirstPaint(
+        _ incoming: FormerDawgsHomeSummary,
+        onto existing: FormerDawgsHomeSummary?
+    ) -> FormerDawgsHomeSummary {
+        guard let existing else { return incoming }
+        return FormerDawgsHomeSummary(
+            hottestHitter: incoming.hottestHitter ?? existing.hottestHitter,
+            hottestPitcher: incoming.hottestPitcher ?? existing.hottestPitcher,
+            latestPromotion: incoming.latestPromotion ?? existing.latestPromotion,
+            latestHeadline: incoming.latestHeadline ?? existing.latestHeadline,
+            weeklyHitterLeaders: incoming.weeklyHitterLeaders.isEmpty ? existing.weeklyHitterLeaders : incoming.weeklyHitterLeaders,
+            weeklyPitcherLeaders: incoming.weeklyPitcherLeaders.isEmpty ? existing.weeklyPitcherLeaders : incoming.weeklyPitcherLeaders,
+            transactionTimeline: incoming.transactionTimeline.isEmpty ? existing.transactionTimeline : incoming.transactionTimeline,
+            favoritesWatchlist: incoming.favoritesWatchlist.isEmpty ? existing.favoritesWatchlist : incoming.favoritesWatchlist,
+            comparisonOptions: incoming.comparisonOptions.isEmpty ? existing.comparisonOptions : incoming.comparisonOptions,
+            todaySummary: incoming.todaySummary.activePlayers.isEmpty ? existing.todaySummary : incoming.todaySummary,
+            todaysActivePlayers: incoming.todaysActivePlayers.isEmpty ? existing.todaysActivePlayers : incoming.todaysActivePlayers,
+            tonightScoreboard: incoming.tonightScoreboard.isEmpty ? existing.tonightScoreboard : incoming.tonightScoreboard
+        )
     }
 }

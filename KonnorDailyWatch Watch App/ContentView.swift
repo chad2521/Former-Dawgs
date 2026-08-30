@@ -10,6 +10,7 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     header
                     streakCard
+                    gamesCard
                     triviaCard
                     favoritesCard
                 }
@@ -17,6 +18,7 @@ struct ContentView: View {
             }
             .navigationTitle("Dawgs")
             .onAppear { model.refresh() }
+            .task { await model.refreshGames() }
         }
     }
 
@@ -48,6 +50,52 @@ struct ContentView: View {
                     Text("Best: \(model.bestStreak)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private var gamesCard: some View {
+        WatchCard {
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(spacing: 6) {
+                    Label("Today", systemImage: "baseball.diamond.bases")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    if model.displayedGames.contains(where: \.isLive) {
+                        Text("Live")
+                            .font(.caption2.weight(.bold))
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(Color.green.opacity(0.22))
+                            .clipShape(Capsule())
+                    }
+                }
+
+                if model.displayedGames.isEmpty {
+                    Text(model.isLoadingGames ? "Checking today's slate…" : "No Dawgs on the board yet")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(model.displayedGames) { player in
+                        VStack(alignment: .leading, spacing: 1) {
+                            HStack {
+                                Text(player.name)
+                                    .font(.caption.weight(.semibold))
+                                    .lineLimit(1)
+                                Spacer(minLength: 4)
+                                Text(player.statusText)
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(player.isLive ? Color.green : Color.secondary)
+                                    .lineLimit(1)
+                            }
+                            Text(player.gameHeadline)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
                 }
             }
         }
@@ -132,10 +180,21 @@ final class WatchModel {
     var currentStreak: Int = 0
     var bestStreak: Int = 0
     var favoriteCount: Int = 0
+    var favoriteIDs: Set<Int> = []
     var todayPrompt: String = ""
     var todayChoices: [String] = []
     var todayAnswer: String = ""
     var todayCategory: String = ""
+    var todaysPlayers: [TodaysDawgSnapshotPlayer] = []
+    var isLoadingGames = false
+
+    var displayedGames: [TodaysDawgSnapshotPlayer] {
+        let favorites = todaysPlayers.filter { favoriteIDs.contains($0.id) }
+        if !favorites.isEmpty {
+            return Array(favorites.prefix(6))
+        }
+        return Array(todaysPlayers.prefix(6))
+    }
 
     private let cloud = NSUbiquitousKeyValueStore.default
     private var observer: NSObjectProtocol?
@@ -155,13 +214,29 @@ final class WatchModel {
         currentStreak = Int(cloud.longLong(forKey: "triviaCurrentStreak"))
         bestStreak = Int(cloud.longLong(forKey: "triviaBestStreak"))
         let favCsv = cloud.string(forKey: "favoritePlayerIDs") ?? ""
-        favoriteCount = favCsv.split(separator: ",").compactMap { Int($0) }.count
+        favoriteIDs = Set(favCsv.split(separator: ",").compactMap { Int($0) })
+        favoriteCount = favoriteIDs.count
 
         todayPrompt = cloud.string(forKey: "triviaTodayPrompt") ?? ""
         todayAnswer = cloud.string(forKey: "triviaTodayAnswer") ?? ""
         todayCategory = cloud.string(forKey: "triviaTodayCategory") ?? ""
         let raw = cloud.string(forKey: "triviaTodayChoices") ?? ""
         todayChoices = raw.split(separator: "\u{1F}").map(String.init)
+
+        if let data = CloudSyncStore.loadTodaysDawgsSnapshotData(),
+           let snapshot = try? JSONDecoder().decode(TodaysDawgsSnapshot.self, from: data) {
+            todaysPlayers = snapshot.players
+        } else {
+            todaysPlayers = PlayerRuntimeStore.loadTodaysDawgsSnapshot().players
+        }
+    }
+
+    func refreshGames() async {
+        isLoadingGames = todaysPlayers.isEmpty
+        await GameDayScheduleService.refreshSharedSnapshots(force: true)
+        todaysPlayers = PlayerRuntimeStore.loadTodaysDawgsSnapshot().players
+        CloudSyncStore.pushTodaysDawgsSnapshot()
+        isLoadingGames = false
     }
 }
 

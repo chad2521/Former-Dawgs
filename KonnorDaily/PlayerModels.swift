@@ -1,5 +1,7 @@
 import Foundation
+#if canImport(ActivityKit)
 import ActivityKit
+#endif
 
 enum SharedAppGroup {
     static let identifier = "group.com.cwdawg.formerdawgs.shared"
@@ -27,7 +29,8 @@ enum CloudSyncStore {
         "triviaUnlockedBadges",
         "triviaLastAnswerDay",
         "triviaLastAnswerQuestionID",
-        "triviaLastAnswerChoice"
+        "triviaLastAnswerChoice",
+        "todaysDawgsSnapshot"
     ]
 
     private static var externalObserver: NSObjectProtocol?
@@ -74,6 +77,25 @@ enum CloudSyncStore {
         cloud.set(answer, forKey: triviaTodayAnswerKey)
         cloud.set(category, forKey: triviaTodayCategoryKey)
         cloud.synchronize()
+    }
+
+    /// Mirror the widget/Watch game-day snapshot through iCloud KVS so Watch can
+    /// read it even when the local Watch App Group is empty.
+    static func pushTodaysDawgsSnapshot() {
+        let cloud = NSUbiquitousKeyValueStore.default
+        if let data = SharedAppGroup.defaults.data(forKey: "todaysDawgsSnapshot") {
+            cloud.set(data, forKey: "todaysDawgsSnapshot")
+        }
+        cloud.synchronize()
+    }
+
+    static func loadTodaysDawgsSnapshotData() -> Data? {
+        let cloud = NSUbiquitousKeyValueStore.default
+        cloud.synchronize()
+        if let data = cloud.data(forKey: "todaysDawgsSnapshot") {
+            return data
+        }
+        return SharedAppGroup.defaults.data(forKey: "todaysDawgsSnapshot")
     }
 }
 
@@ -420,6 +442,48 @@ struct ScheduleResponse: Decodable {
     struct Linescore: Decodable {
         let currentInning: Int?
         let inningHalf: String?
+    }
+}
+
+extension TodayGame {
+    static func from(scheduleGame game: ScheduleResponse.Game, teamID: Int) -> TodayGame? {
+        let isHome = game.teams.home.team.id == teamID
+        let opponentName = isHome ? game.teams.away.team.name : game.teams.home.team.name
+        let homeTeamID = game.teams.home.team.id
+
+        let state: TodayGame.State
+        switch game.status?.abstractGameState?.lowercased() {
+        case "live":
+            state = .live
+        case "final":
+            state = .final
+        default:
+            state = .scheduled
+        }
+
+        let startTime = game.gameDate.flatMap { ISO8601DateFormatter().date(from: $0) }
+        let inningText: String?
+        if state == .live, let inning = game.linescore?.currentInning {
+            let half = game.linescore?.inningHalf?.prefix(1) ?? ""
+            inningText = "\(half)\(inning)".trimmingCharacters(in: .whitespaces)
+        } else {
+            inningText = nil
+        }
+
+        return TodayGame(
+            state: state,
+            opponentName: opponentName,
+            isHome: isHome,
+            startTime: startTime,
+            homeScore: game.teams.home.score,
+            awayScore: game.teams.away.score,
+            inningText: inningText,
+            venueName: game.venue?.name,
+            venueCity: nil,
+            latitude: nil,
+            longitude: nil,
+            homeTeamID: homeTeamID
+        )
     }
 }
 
@@ -1063,8 +1127,68 @@ enum PlayerRuntimeStore {
         }
         return snapshot
     }
+
+    static func saveTodaysDawgsSnapshot(players: [TodaysDawgSnapshotPlayer]) {
+        let snapshot = TodaysDawgsSnapshot(generatedAt: Date(), players: players)
+        guard let data = try? JSONEncoder().encode(snapshot) else { return }
+        SharedAppGroup.defaults.set(data, forKey: todaysDawgsSnapshotKey)
+    }
+
+    static func markPlayersWithGameToday(_ playerIDs: Set<Int>) {
+        let defaults = SharedAppGroup.defaults
+        var todayDates = defaults.dictionary(forKey: todayGameKey) as? [String: String] ?? [:]
+        let today = todayDateString
+        for id in playerIDs {
+            todayDates[String(id)] = today
+        }
+        defaults.set(todayDates, forKey: todayGameKey)
+    }
+
+    /// Overlay live/scheduled game lines onto the favorite widget without a full dashboard.
+    static func overlayFavoriteSnapshot(from gamePlayers: [TodaysDawgSnapshotPlayer]) {
+        let favoriteIDs = FavoritePlayerStore.ids(
+            from: SharedAppGroup.defaults.string(forKey: "favoritePlayerIDs") ?? ""
+        )
+        var snapshot = loadFavoritePlayerSnapshot()
+
+        if let existing = snapshot.player, let game = gamePlayers.first(where: { $0.id == existing.id }) {
+            snapshot = FavoritePlayerWidgetSnapshot(
+                generatedAt: Date(),
+                player: FavoritePlayerWidgetPlayer(
+                    id: existing.id,
+                    name: existing.name,
+                    role: existing.role,
+                    teamLine: existing.teamLine,
+                    levelLabel: existing.levelLabel,
+                    primaryLine: game.gameHeadline,
+                    detailLine: game.statusText,
+                    isActiveToday: true
+                )
+            )
+        } else if snapshot.player == nil, let game = gamePlayers.first(where: { favoriteIDs.contains($0.id) }) {
+            let catalog = PlayerCatalog.player(for: game.id)
+            snapshot = FavoritePlayerWidgetSnapshot(
+                generatedAt: Date(),
+                player: FavoritePlayerWidgetPlayer(
+                    id: game.id,
+                    name: game.name,
+                    role: game.role,
+                    teamLine: "\(game.role) | \(game.teamName)",
+                    levelLabel: catalog.levelLabel,
+                    primaryLine: game.gameHeadline,
+                    detailLine: game.statusText,
+                    isActiveToday: true
+                )
+            )
+        }
+
+        if let data = try? JSONEncoder().encode(snapshot) {
+            SharedAppGroup.defaults.set(data, forKey: favoritePlayerSnapshotKey)
+        }
+    }
 }
 
+#if canImport(ActivityKit)
 struct DawgLiveActivityAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         var statusLabel: String
@@ -1079,6 +1203,7 @@ struct DawgLiveActivityAttributes: ActivityAttributes {
     let teamLogoCode: String?
     let role: String
 }
+#endif
 
 struct TodaysDawgsSnapshot: Codable, Hashable {
     let generatedAt: Date?
@@ -1104,6 +1229,16 @@ struct TodaysDawgSnapshotPlayer: Identifiable, Codable, Hashable {
     let gameHeadline: String
     let statusText: String
     let isLive: Bool
+
+    init(id: Int, name: String, role: String, teamName: String, gameHeadline: String, statusText: String, isLive: Bool) {
+        self.id = id
+        self.name = name
+        self.role = role
+        self.teamName = teamName
+        self.gameHeadline = gameHeadline
+        self.statusText = statusText
+        self.isLive = isLive
+    }
 
     init(dashboard: PlayerDashboard) {
         id = dashboard.catalogEntry.id

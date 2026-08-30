@@ -454,17 +454,44 @@ struct PlayerService {
 
     /// Same as `fetchHomeSummary`, but also reports whether the result was served
     /// entirely from cache because the network was unavailable (offline state).
-    func fetchHomeSummaryDetailed(players: [PlayerCatalogEntry], forceRefresh: Bool = false) async -> (summary: FormerDawgsHomeSummary, isStale: Bool) {
-        // Core stats/games in parallel first — skip Google News for every Dawg.
+    /// Favorites, known game-day players, and MLB catalog — small enough for a first Home paint.
+    func firstPaintPlayers() -> [PlayerCatalogEntry] {
+        let favoriteIDs = FavoritePlayerStore.ids(
+            from: SharedAppGroup.defaults.string(forKey: "favoritePlayerIDs") ?? ""
+        )
+        let gameToday = PlayerRuntimeStore.playersWithGameToday()
+        let players = PlayerCatalog.players
+        let priority = players.filter { player in
+            favoriteIDs.contains(player.id)
+                || gameToday.contains(player.id)
+                || !player.isMinorLeaguer
+        }
+        return priority.isEmpty ? players : priority
+    }
+
+    func fetchHomeSummaryDetailed(
+        players: [PlayerCatalogEntry],
+        forceRefresh: Bool = false,
+        options: DashboardFetchOptions = .core,
+        includeHomeStories: Bool = true,
+        persistSnapshots: Bool = true
+    ) async -> (summary: FormerDawgsHomeSummary, isStale: Bool) {
         let loaded = await loadDashboards(
             players: players,
             forceRefresh: forceRefresh,
-            options: .core
+            options: options,
+            persistSnapshots: persistSnapshots
         )
-        // Headlines only for a priority subset so Home still has news without N×RSS cost.
-        let dashboards = await enrichHomeStories(loaded.dashboards)
+        let dashboards: [PlayerDashboard]
+        if includeHomeStories {
+            dashboards = await enrichHomeStories(loaded.dashboards)
+        } else {
+            dashboards = loaded.dashboards
+        }
         let summary = makeHomeSummary(from: dashboards)
-        PlayerRuntimeStore.saveHomeWidgetSnapshots(from: summary)
+        if persistSnapshots {
+            PlayerRuntimeStore.saveHomeWidgetSnapshots(from: summary)
+        }
         return (summary, loaded.servedStale)
     }
 
@@ -525,7 +552,7 @@ struct PlayerService {
         )
     }
 
-    /// Pull Google News only for favorites / active / top performers (not the full roster).
+    /// Pull MLB transactions/headlines only for favorites / active / top performers (not the full roster).
     private func enrichHomeStories(_ dashboards: [PlayerDashboard]) async -> [PlayerDashboard] {
         let favoriteIDs = Set(
             (SharedAppGroup.defaults.string(forKey: "favoritePlayerIDs") ?? "")
@@ -539,7 +566,6 @@ struct PlayerService {
             if lScore != rScore { return lScore > rScore }
             return lhs.catalogEntry.displayName < rhs.catalogEntry.displayName
         }
-        // Cap RSS work hard — this was the main cold-start bottleneck.
         let targets = Array(priority.prefix(10))
 
         var storyMap: [Int: [Story]] = [:]
@@ -645,7 +671,8 @@ struct PlayerService {
     private func loadDashboards(
         players: [PlayerCatalogEntry],
         forceRefresh: Bool,
-        options: DashboardFetchOptions = .full
+        options: DashboardFetchOptions = .full,
+        persistSnapshots: Bool = true
     ) async -> (dashboards: [PlayerDashboard], servedStale: Bool) {
         var allDashboards: [PlayerDashboard] = []
         allDashboards.reserveCapacity(players.count)
@@ -700,7 +727,9 @@ struct PlayerService {
             }
         }
 
-        PlayerRuntimeStore.saveTodaysDawgsSnapshot(from: allDashboards)
+        if persistSnapshots {
+            PlayerRuntimeStore.saveTodaysDawgsSnapshot(from: allDashboards)
+        }
         return (allDashboards, loadedStaleDashboard && !loadedNetworkDashboard)
     }
 
@@ -834,7 +863,13 @@ struct PlayerService {
     }
 
     private func storyPublishedDate(for story: Story) -> Date {
-        Self.storyPublishedDateFormatter().date(from: story.publishedText) ?? .distantPast
+        if let rss = Self.storyPublishedDateFormatter().date(from: story.publishedText) {
+            return rss
+        }
+        if let iso = Self.gameLogDateFormatter().date(from: story.publishedText) {
+            return iso
+        }
+        return .distantPast
     }
 
     private func hitterScore(_ dashboard: PlayerDashboard) -> Double {
