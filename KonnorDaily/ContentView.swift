@@ -6,6 +6,7 @@ struct ContentView: View {
     @State private var viewModel = DashboardViewModel()
     @State private var homeViewModel = HomeViewModel()
     @State private var selectedTab = AppTab.home
+    @State private var isShowingPlayerDetail = false
     @State private var router = IntentRouter.shared
 
     var body: some View {
@@ -13,14 +14,39 @@ struct ContentView: View {
             HomeScreen(
                 viewModel: homeViewModel,
                 onSelectPlayer: navigateToPlayer,
-                onOpenTrivia: { selectedTab = .trivia }
+                onOpenTrivia: { selectedTab = .trivia },
+                onOpenTonightMap: {
+                    IntentRouter.shared.requestTonightMap()
+                }
             )
             .tabItem { Label("Home", systemImage: "house.fill") }
             .tag(AppTab.home)
 
-            PlayerScreen(viewModel: viewModel)
-                .tabItem { Label("Player", systemImage: "person.fill") }
-                .tag(AppTab.player)
+            TonightScreen(
+                viewModel: homeViewModel,
+                onSelectPlayer: navigateToPlayer
+            )
+            .tabItem { Label("Tonight", systemImage: "sportscourt.fill") }
+            .tag(AppTab.tonight)
+
+            Group {
+                if isShowingPlayerDetail {
+                    PlayerScreen(viewModel: viewModel) {
+                        isShowingPlayerDetail = false
+                    }
+                } else {
+                    BrowseScreen(
+                        dashboards: homeViewModel.summary?.comparisonOptions ?? [],
+                        onSelectPlayer: navigateToPlayer
+                    )
+                }
+            }
+                .tabItem { Label("Players", systemImage: "person.3.fill") }
+                .tag(AppTab.browse)
+
+            CowbellScreen()
+                .tabItem { Label("Cowbell", systemImage: "bell.fill") }
+                .tag(AppTab.cowbell)
 
             TriviaScreen()
                 .tabItem { Label("Trivia", systemImage: "questionmark.bubble.fill") }
@@ -35,22 +61,35 @@ struct ContentView: View {
 
     private func navigateToPlayer(_ player: PlayerCatalogEntry) {
         selectedPlayerID = player.id
-        selectedTab = .player
+        selectedTab = .browse
+        isShowingPlayerDetail = true
     }
 
     private func applyIntentRequest() {
         let request = router.consume()
         if let playerID = request.playerID {
             selectedPlayerID = playerID
+            selectedTab = .browse
+            isShowingPlayerDetail = true
         }
         if let tab = request.tab {
-            selectedTab = tab
+            if tab == .player {
+                selectedTab = .browse
+                isShowingPlayerDetail = true
+            } else {
+                selectedTab = tab
+            }
+        }
+        // Tonight map flag is consumed by TonightScreen; re-set if we consumed it here
+        // only when routing from Siri/deep link through the same path.
+        if request.openTonightMap {
+            IntentRouter.shared.pendingTonightMap = true
         }
     }
 }
 
 enum AppTab {
-    case home, player, trivia
+    case home, tonight, browse, player, cowbell, trivia
 }
 
 #Preview {

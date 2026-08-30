@@ -2,10 +2,12 @@ import WidgetKit
 import SwiftUI
 
 @main
-struct KonnorDailyWidgetBundle: WidgetBundle {
+struct FormerDawgsWidgetBundle: WidgetBundle {
     var body: some Widget {
         TodaysDawgsWidget()
-        KonnorDailyWidget()
+        FavoritePlayerWidget()
+        NewsWidget()
+        FormerDawgsWidget()
         DawgLiveActivityWidget()
     }
 }

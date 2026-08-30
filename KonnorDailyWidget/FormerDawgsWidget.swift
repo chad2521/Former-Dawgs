@@ -204,7 +204,7 @@ struct TodaysDawgsWidgetEntryView: View {
 }
 
 struct TodaysDawgsWidget: Widget {
-    let kind: String = "KonnorDailyTodaysDawgsWidget"
+    let kind: String = "FormerDawgsTodaysDawgsWidget"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: TodaysDawgsProvider()) { entry in
@@ -212,6 +212,425 @@ struct TodaysDawgsWidget: Widget {
         }
         .configurationDisplayName("Today's Dawgs")
         .description("See which former Mississippi State players are active today.")
+        .supportedFamilies([
+            .systemSmall, .systemMedium, .systemLarge,
+            .accessoryInline, .accessoryRectangular, .accessoryCircular
+        ])
+    }
+}
+
+struct FavoritePlayerEntry: TimelineEntry {
+    let date: Date
+    let snapshot: FavoritePlayerWidgetSnapshot
+}
+
+struct FavoritePlayerProvider: TimelineProvider {
+    func placeholder(in context: Context) -> FavoritePlayerEntry {
+        FavoritePlayerEntry(
+            date: Date(),
+            snapshot: FavoritePlayerWidgetSnapshot(
+                generatedAt: Date(),
+                player: FavoritePlayerWidgetPlayer(
+                    id: 1,
+                    name: "Jake Mangum",
+                    role: "OF",
+                    teamLine: "OF | Pittsburgh Pirates",
+                    levelLabel: "MLB",
+                    primaryLine: "vs Braves",
+                    detailLine: "6:40 PM",
+                    isActiveToday: true
+                )
+            )
+        )
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (FavoritePlayerEntry) -> Void) {
+        completion(FavoritePlayerEntry(date: Date(), snapshot: PlayerRuntimeStore.loadFavoritePlayerSnapshot()))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<FavoritePlayerEntry>) -> Void) {
+        let now = Date()
+        let entry = FavoritePlayerEntry(date: now, snapshot: PlayerRuntimeStore.loadFavoritePlayerSnapshot())
+        completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(60 * 30))))
+    }
+}
+
+struct FavoritePlayerWidgetEntryView: View {
+    let entry: FavoritePlayerEntry
+    @Environment(\.widgetFamily) private var family
+
+    var body: some View {
+        switch family {
+        case .systemSmall:
+            smallBody
+        case .systemMedium:
+            mediumBody
+        case .systemLarge, .systemExtraLarge:
+            largeBody
+        case .accessoryInline:
+            Text(entry.snapshot.player?.name ?? "Pick a favorite Dawg")
+        case .accessoryRectangular:
+            accessoryRectangularBody
+        case .accessoryCircular:
+            Image(systemName: entry.snapshot.player?.isActiveToday == true ? "star.circle.fill" : "star.fill")
+        @unknown default:
+            mediumBody
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "star.fill")
+            Text("Favorite Dawg")
+                .font(.caption.weight(.bold))
+                .textCase(.uppercase)
+            Spacer(minLength: 0)
+            if entry.snapshot.player?.isActiveToday == true {
+                Text("Today")
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.green.opacity(0.28))
+                    .clipShape(Capsule())
+            }
+        }
+        .foregroundStyle(.white)
+    }
+
+    private var smallBody: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            header
+            if let player = entry.snapshot.player {
+                Text(player.name)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                Text(player.primaryLine)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.82))
+                    .lineLimit(3)
+                Spacer(minLength: 0)
+                Text(player.levelLabel)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.75))
+            } else {
+                emptyFavoriteText
+            }
+        }
+        .padding(12)
+        .containerBackground(maroonGradient, for: .widget)
+    }
+
+    private var mediumBody: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
+                header
+                if let player = entry.snapshot.player {
+                    Text(player.name)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                    Text(player.teamLine)
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.74))
+                        .lineLimit(1)
+                } else {
+                    emptyFavoriteText
+                }
+            }
+
+            Spacer(minLength: 0)
+
+            if let player = entry.snapshot.player {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(player.primaryLine)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .lineLimit(3)
+                    Text(player.detailLine)
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.74))
+                        .lineLimit(2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(12)
+        .containerBackground(maroonGradient, for: .widget)
+    }
+
+    private var largeBody: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            header
+            if let player = entry.snapshot.player {
+                Text(player.name)
+                    .font(.title.weight(.black))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                Text(player.teamLine)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.78))
+                Text(player.primaryLine)
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .lineLimit(4)
+                Text(player.detailLine)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.74))
+                Spacer(minLength: 0)
+                Text(player.levelLabel)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.74))
+            } else {
+                emptyFavoriteText
+            }
+        }
+        .padding(14)
+        .containerBackground(maroonGradient, for: .widget)
+    }
+
+    private var accessoryRectangularBody: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Favorite Dawg")
+                .font(.caption2.weight(.bold))
+            Text(entry.snapshot.player?.primaryLine ?? "Pick a favorite in the app")
+                .font(.caption2)
+                .lineLimit(2)
+        }
+        .containerBackground(.clear, for: .widget)
+    }
+
+    private var emptyFavoriteText: some View {
+        Text("Pick a favorite player in Former Dawgs.")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.white.opacity(0.82))
+            .lineLimit(4)
+    }
+
+    private var maroonGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(red: 0.40, green: 0.10, blue: 0.16), Color(red: 0.10, green: 0.10, blue: 0.11)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+}
+
+struct FavoritePlayerWidget: Widget {
+    let kind: String = "FormerDawgsFavoritePlayerWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: FavoritePlayerProvider()) { entry in
+            FavoritePlayerWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("Favorite Dawg")
+        .description("Keep your top tracked former Mississippi State player on the Home Screen.")
+        .supportedFamilies([
+            .systemSmall, .systemMedium, .systemLarge,
+            .accessoryInline, .accessoryRectangular, .accessoryCircular
+        ])
+    }
+}
+
+struct NewsEntry: TimelineEntry {
+    let date: Date
+    let snapshot: NewsWidgetSnapshot
+}
+
+struct NewsProvider: TimelineProvider {
+    func placeholder(in context: Context) -> NewsEntry {
+        NewsEntry(
+            date: Date(),
+            snapshot: NewsWidgetSnapshot(
+                generatedAt: Date(),
+                stories: [
+                    NewsWidgetStory(
+                        id: "sample",
+                        playerName: "Konnor Pilkington",
+                        title: "Former Dawg earns a promotion",
+                        source: "MiLB",
+                        publishedText: "Today",
+                        isPromotion: true
+                    )
+                ]
+            )
+        )
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (NewsEntry) -> Void) {
+        completion(NewsEntry(date: Date(), snapshot: PlayerRuntimeStore.loadNewsSnapshot()))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<NewsEntry>) -> Void) {
+        let now = Date()
+        let entry = NewsEntry(date: now, snapshot: PlayerRuntimeStore.loadNewsSnapshot())
+        completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(60 * 45))))
+    }
+}
+
+struct NewsWidgetEntryView: View {
+    let entry: NewsEntry
+    @Environment(\.widgetFamily) private var family
+
+    var body: some View {
+        switch family {
+        case .systemSmall:
+            smallBody
+        case .systemMedium:
+            mediumBody
+        case .systemLarge, .systemExtraLarge:
+            largeBody
+        case .accessoryInline:
+            Text(entry.snapshot.headline)
+        case .accessoryRectangular:
+            accessoryRectangularBody
+        case .accessoryCircular:
+            Image(systemName: entry.snapshot.stories.first?.isPromotion == true ? "arrow.up.circle.fill" : "newspaper.fill")
+        @unknown default:
+            mediumBody
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "newspaper.fill")
+            Text("Dawgs News")
+                .font(.caption.weight(.bold))
+                .textCase(.uppercase)
+            Spacer(minLength: 0)
+            if entry.snapshot.stories.first?.isPromotion == true {
+                Text("Promotion")
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.white.opacity(0.18))
+                    .clipShape(Capsule())
+            }
+        }
+        .foregroundStyle(.white)
+    }
+
+    private var smallBody: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            header
+            if let story = entry.snapshot.stories.first {
+                Text(story.playerName)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.78))
+                    .lineLimit(1)
+                Text(story.title)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(4)
+                    .minimumScaleFactor(0.72)
+                Spacer(minLength: 0)
+                Text([story.source, story.publishedText].filter { !$0.isEmpty }.joined(separator: " • "))
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .lineLimit(1)
+            } else {
+                emptyNewsText
+            }
+        }
+        .padding(12)
+        .containerBackground(maroonGradient, for: .widget)
+    }
+
+    private var mediumBody: some View {
+        HStack(alignment: .top, spacing: 14) {
+            VStack(alignment: .leading, spacing: 8) {
+                header
+                Text(entry.snapshot.headline)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(3)
+                Spacer(minLength: 0)
+            }
+
+            VStack(alignment: .leading, spacing: 7) {
+                ForEach(entry.snapshot.stories.prefix(3)) { story in
+                    storyRow(story)
+                }
+                if entry.snapshot.stories.isEmpty {
+                    emptyNewsText
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(12)
+        .containerBackground(maroonGradient, for: .widget)
+    }
+
+    private var largeBody: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            header
+            if entry.snapshot.stories.isEmpty {
+                emptyNewsText
+            } else {
+                ForEach(entry.snapshot.stories.prefix(5)) { story in
+                    storyRow(story)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .containerBackground(maroonGradient, for: .widget)
+    }
+
+    private var accessoryRectangularBody: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Dawgs News")
+                .font(.caption2.weight(.bold))
+            Text(entry.snapshot.headline)
+                .font(.caption2)
+                .lineLimit(2)
+        }
+        .containerBackground(.clear, for: .widget)
+    }
+
+    private func storyRow(_ story: NewsWidgetStory) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Image(systemName: story.isPromotion ? "arrow.up.circle.fill" : "doc.text.fill")
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.75))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(story.playerName)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                Text(story.title)
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.74))
+                    .lineLimit(2)
+            }
+        }
+    }
+
+    private var emptyNewsText: some View {
+        Text("Refresh the app home tab to publish recent headlines here.")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.white.opacity(0.82))
+            .lineLimit(4)
+    }
+
+    private var maroonGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(red: 0.40, green: 0.10, blue: 0.16), Color(red: 0.10, green: 0.10, blue: 0.11)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+}
+
+struct NewsWidget: Widget {
+    let kind: String = "FormerDawgsNewsWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: NewsProvider()) { entry in
+            NewsWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("Dawgs News")
+        .description("Track recent promotions, headlines, and transaction notes.")
         .supportedFamilies([
             .systemSmall, .systemMedium, .systemLarge,
             .accessoryInline, .accessoryRectangular, .accessoryCircular
@@ -256,7 +675,7 @@ struct TriviaProvider: TimelineProvider {
     }
 }
 
-struct KonnorDailyWidgetEntryView: View {
+struct FormerDawgsWidgetEntryView: View {
     var entry: TriviaProvider.Entry
     @Environment(\.widgetFamily) private var family
 
@@ -374,12 +793,12 @@ struct KonnorDailyWidgetEntryView: View {
     }
 }
 
-struct KonnorDailyWidget: Widget {
-    let kind: String = "KonnorDailyTriviaWidget"
+struct FormerDawgsWidget: Widget {
+    let kind: String = "FormerDawgsTriviaWidget"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: TriviaProvider()) { entry in
-            KonnorDailyWidgetEntryView(entry: entry)
+            FormerDawgsWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Bulldog Daily Trivia")
         .description("A fresh Mississippi State baseball question every day.")

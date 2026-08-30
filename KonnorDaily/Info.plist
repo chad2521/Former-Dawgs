@@ -24,6 +24,14 @@
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
 	<true/>
+	<!-- Optional: HTTPS URL that receives Live Activity push tokens (POST JSON). -->
+	<key>LiveActivityPushEndpoint</key>
+	<string></string>
+	<!-- YouTube Data API v3 key. Used to find & rank the best highlight video
+	     for the hottest hitter/pitcher. Leave blank to fall back to a plain
+	     YouTube search link. Get a key at https://console.cloud.google.com/ -->
+	<key>YouTubeDataAPIKey</key>
+	<string></string>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>Get alerts when Former Dawgs homer, get called up, or have games tipping off.</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>

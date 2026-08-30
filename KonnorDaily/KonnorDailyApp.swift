@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct KonnorDailyApp: App {
+struct FormerDawgsApp: App {
     init() {
         CloudSyncStore.syncFromCloud()
         CloudSyncStore.startObserving()
@@ -14,8 +14,19 @@ struct KonnorDailyApp: App {
             category: question.category
         )
         BackgroundRefreshScheduler.shared.register()
-        BackgroundRefreshScheduler.shared.schedule()
-        Task { await DawgPushNotifier.shared.requestPermission() }
+        BackgroundRefreshScheduler.shared.schedule(
+            preferFrequent: DawgLiveActivityManager.shared.hasActiveActivities
+        )
+        DawgLiveActivityManager.shared.restoreObservers()
+        Task {
+            await DawgPushNotifier.shared.requestPermission()
+            await DawgPushNotifier.shared.scheduleTriviaReminderIfNeeded()
+        }
+        Task {
+            try? await Task.sleep(for: .seconds(30))
+            guard !Task.isCancelled else { return }
+            await DraftWatcher.shared.checkForNewPicks()
+        }
     }
 
     var body: some Scene {

@@ -24,7 +24,10 @@ enum CloudSyncStore {
         "triviaCurrentStreak",
         "triviaBestStreak",
         "triviaLastCorrectDay",
-        "triviaPracticeCategory"
+        "triviaUnlockedBadges",
+        "triviaLastAnswerDay",
+        "triviaLastAnswerQuestionID",
+        "triviaLastAnswerChoice"
     ]
 
     private static var externalObserver: NSObjectProtocol?
@@ -74,12 +77,83 @@ enum CloudSyncStore {
     }
 }
 
-enum PlayerKind: String, CaseIterable {
+enum PlayerKind: String, CaseIterable, Codable {
     case hitter
     case pitcher
 }
 
-struct PlayerCatalogEntry: Identifiable, Hashable {
+struct DynamicDraftee: Codable, Hashable, Identifiable {
+    let id: Int
+    let fullName: String
+    let role: String
+    let kindRawValue: String
+    let pickOverall: Int?
+    let pickRound: String?
+    let teamID: Int?
+    let teamName: String?
+    let teamLogoCode: String?
+    let draftYear: Int
+    let discoveredAt: Date
+
+    var kind: PlayerKind {
+        PlayerKind(rawValue: kindRawValue) ?? .hitter
+    }
+
+    var pickHeadline: String {
+        var parts: [String] = []
+        if pickRound == "Free Agent" {
+            parts.append("Undrafted free agent")
+        } else if let pickRound, !pickRound.isEmpty {
+            parts.append("Round \(pickRound)")
+        }
+        if let pickOverall { parts.append("#\(pickOverall) overall") }
+        if let teamName { parts.append(teamName) }
+        return parts.joined(separator: " \u{2022} ")
+    }
+
+    var wasUndraftedFreeAgent: Bool {
+        pickRound == "Free Agent" && pickOverall == nil
+    }
+
+    func toCatalogEntry() -> PlayerCatalogEntry {
+        PlayerCatalogEntry(
+            id: id,
+            displayName: fullName,
+            role: role,
+            msuYears: String(draftYear),
+            kind: kind,
+            isMinorLeaguer: true,
+            preferredSportID: 16,
+            teamLogoCode: teamLogoCode
+        )
+    }
+}
+
+enum DynamicDrafteeStore {
+    static let storageKey = "dynamicDraftees"
+
+    static func loadAll() -> [DynamicDraftee] {
+        guard let data = SharedAppGroup.defaults.data(forKey: storageKey) else { return [] }
+        return (try? JSONDecoder().decode([DynamicDraftee].self, from: data)) ?? []
+    }
+
+    static func save(_ list: [DynamicDraftee]) {
+        guard let data = try? JSONEncoder().encode(list) else { return }
+        SharedAppGroup.defaults.set(data, forKey: storageKey)
+    }
+
+    static func contains(_ playerID: Int) -> Bool {
+        loadAll().contains { $0.id == playerID }
+    }
+
+    static func recentDraftees(within days: Int = 21) -> [DynamicDraftee] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast
+        return loadAll().filter { $0.discoveredAt >= cutoff }
+            .sorted { $0.discoveredAt > $1.discoveredAt }
+    }
+}
+
+struct PlayerCatalogEntry: Identifiable, Hashable, Codable {
     let id: Int
     let displayName: String
     let role: String
@@ -91,11 +165,25 @@ struct PlayerCatalogEntry: Identifiable, Hashable {
 }
 
 enum PlayerCatalog {
-    static let players: [PlayerCatalogEntry] = rawPlayers.sorted {
-        $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
+    static var staticPlayers: [PlayerCatalogEntry] {
+        rawPlayers.sorted {
+            $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
+        }
     }
 
-    static let fallback = players[0]
+    static var players: [PlayerCatalogEntry] {
+        let staticIDs = Set(rawPlayers.map(\.id))
+        let dynamic = DynamicDrafteeStore.loadAll()
+            .filter { !staticIDs.contains($0.id) }
+            .map { $0.toCatalogEntry() }
+        return (rawPlayers + dynamic).sorted {
+            $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
+        }
+    }
+
+    static var fallback: PlayerCatalogEntry {
+        players.first ?? rawPlayers[0]
+    }
 
     static func player(for id: Int) -> PlayerCatalogEntry {
         players.first { $0.id == id } ?? fallback
@@ -155,7 +243,7 @@ enum PlayerCatalog {
 struct PlayerProfile: Decodable {
     let people: [Person]
 
-    struct Person: Decodable {
+    struct Person: Codable {
         let id: Int
         let fullName: String
         let primaryNumber: String?
@@ -175,7 +263,7 @@ struct PlayerStatsResponse: Decodable {
         let splits: [Split]
     }
 
-    struct Split: Decodable {
+    struct Split: Codable {
         let stat: BaseballStat
         let team: Team?
         let league: League?
@@ -184,28 +272,29 @@ struct PlayerStatsResponse: Decodable {
     }
 }
 
-struct Team: Decodable {
+struct Team: Codable {
     let id: Int
     let name: String
+    let parentOrgId: Int?
 }
 
-struct Position: Decodable {
+struct Position: Codable {
     let abbreviation: String
 }
 
-struct Side: Decodable {
+struct Side: Codable {
     let code: String
 }
 
-struct League: Decodable {
+struct League: Codable {
     let name: String
 }
 
-struct Sport: Decodable {
+struct Sport: Codable {
     let abbreviation: String?
 }
 
-struct BaseballStat: Decodable {
+struct BaseballStat: Codable {
     let summary: String?
     let gamesPlayed: Int?
     let atBats: Int?
@@ -231,8 +320,8 @@ struct BaseballStat: Decodable {
     let whip: String?
 }
 
-struct TodayGame: Hashable {
-    enum State: Hashable {
+struct TodayGame: Hashable, Codable {
+    enum State: String, Hashable, Codable {
         case scheduled
         case live
         case final
@@ -245,6 +334,13 @@ struct TodayGame: Hashable {
     let homeScore: Int?
     let awayScore: Int?
     let inningText: String?
+    /// Ballpark name when available from the schedule.
+    let venueName: String?
+    let venueCity: String?
+    let latitude: Double?
+    let longitude: Double?
+    /// Home club team id for the game (venue host).
+    let homeTeamID: Int?
 
     var headline: String {
         let prefix = isHome ? "vs" : "@"
@@ -267,8 +363,15 @@ struct TodayGame: Hashable {
             }
             return score
         case .final:
+            if homeScore == nil, awayScore == nil {
+                return "Played today"
+            }
             return "Final \(formatScore())"
         }
+    }
+
+    var hasMapCoordinate: Bool {
+        latitude != nil && longitude != nil
     }
 
     private func formatScore() -> String {
@@ -291,6 +394,12 @@ struct ScheduleResponse: Decodable {
         let status: GameStatus?
         let teams: GameTeams
         let linescore: Linescore?
+        let venue: ScheduleVenue?
+    }
+
+    struct ScheduleVenue: Decodable {
+        let id: Int?
+        let name: String?
     }
 
     struct GameStatus: Decodable {
@@ -314,7 +423,112 @@ struct ScheduleResponse: Decodable {
     }
 }
 
-struct PlayerDashboard {
+struct VenueDetailsResponse: Decodable {
+    let venues: [VenueDetail]
+
+    struct VenueDetail: Decodable {
+        let id: Int?
+        let name: String?
+        let location: Location?
+    }
+
+    struct Location: Decodable {
+        let city: String?
+        let stateAbbrev: String?
+        let defaultCoordinates: Coordinates?
+    }
+
+    struct Coordinates: Decodable {
+        let latitude: Double
+        let longitude: Double
+    }
+}
+
+/// Fallback park coordinates for MLB franchise team ids (used when venue hydrate fails).
+enum BallparkCatalog {
+    struct Park {
+        let name: String
+        let city: String
+        let latitude: Double
+        let longitude: Double
+    }
+
+    private static let parksByTeamID: [Int: Park] = [
+        108: Park(name: "Angel Stadium", city: "Anaheim", latitude: 33.8003, longitude: -117.8827),
+        109: Park(name: "Chase Field", city: "Phoenix", latitude: 33.4453, longitude: -112.0667),
+        110: Park(name: "Oriole Park", city: "Baltimore", latitude: 39.2839, longitude: -76.6217),
+        111: Park(name: "Fenway Park", city: "Boston", latitude: 42.3467, longitude: -71.0972),
+        112: Park(name: "Wrigley Field", city: "Chicago", latitude: 41.9484, longitude: -87.6553),
+        113: Park(name: "Great American Ball Park", city: "Cincinnati", latitude: 39.0979, longitude: -84.5082),
+        114: Park(name: "Progressive Field", city: "Cleveland", latitude: 41.4962, longitude: -81.6852),
+        115: Park(name: "Coors Field", city: "Denver", latitude: 39.7559, longitude: -104.9942),
+        116: Park(name: "Comerica Park", city: "Detroit", latitude: 42.3390, longitude: -83.0485),
+        117: Park(name: "Daikin Park", city: "Houston", latitude: 29.7573, longitude: -95.3555),
+        118: Park(name: "Kauffman Stadium", city: "Kansas City", latitude: 39.0517, longitude: -94.4803),
+        119: Park(name: "Dodger Stadium", city: "Los Angeles", latitude: 34.0739, longitude: -118.2400),
+        120: Park(name: "Nationals Park", city: "Washington", latitude: 38.8730, longitude: -77.0074),
+        121: Park(name: "Citi Field", city: "New York", latitude: 40.7571, longitude: -73.8458),
+        133: Park(name: "Sutter Health Park", city: "West Sacramento", latitude: 38.5802, longitude: -121.5136),
+        134: Park(name: "PNC Park", city: "Pittsburgh", latitude: 40.4469, longitude: -80.0057),
+        135: Park(name: "Petco Park", city: "San Diego", latitude: 32.7076, longitude: -117.1570),
+        136: Park(name: "T-Mobile Park", city: "Seattle", latitude: 47.5914, longitude: -122.3325),
+        137: Park(name: "Oracle Park", city: "San Francisco", latitude: 37.7786, longitude: -122.3893),
+        138: Park(name: "Busch Stadium", city: "St. Louis", latitude: 38.6226, longitude: -90.1928),
+        139: Park(name: "George M. Steinbrenner Field", city: "Tampa", latitude: 27.9803, longitude: -82.5066),
+        140: Park(name: "Globe Life Field", city: "Arlington", latitude: 32.7473, longitude: -97.0842),
+        141: Park(name: "Rogers Centre", city: "Toronto", latitude: 43.6414, longitude: -79.3894),
+        142: Park(name: "Target Field", city: "Minneapolis", latitude: 44.9817, longitude: -93.2776),
+        143: Park(name: "Citizens Bank Park", city: "Philadelphia", latitude: 39.9061, longitude: -75.1665),
+        144: Park(name: "Truist Park", city: "Atlanta", latitude: 33.8907, longitude: -84.4677),
+        145: Park(name: "Rate Field", city: "Chicago", latitude: 41.8299, longitude: -87.6338),
+        146: Park(name: "loanDepot park", city: "Miami", latitude: 25.7781, longitude: -80.2197),
+        147: Park(name: "Yankee Stadium", city: "New York", latitude: 40.8296, longitude: -73.9262),
+        158: Park(name: "American Family Field", city: "Milwaukee", latitude: 43.0280, longitude: -87.9712)
+    ]
+
+    static func park(forTeamID id: Int) -> Park? {
+        parksByTeamID[id]
+    }
+}
+
+enum VenueCoordinateCache {
+    private static let key = "venueCoordinateCacheV1"
+
+    struct Entry: Codable {
+        let latitude: Double
+        let longitude: Double
+        let city: String?
+        let name: String?
+    }
+
+    private static var memory: [Int: Entry] = [:]
+
+    static func entry(for venueID: Int) -> Entry? {
+        if let memory = memory[venueID] { return memory }
+        guard let data = SharedAppGroup.defaults.data(forKey: key),
+              let map = try? JSONDecoder().decode([String: Entry].self, from: data),
+              let entry = map[String(venueID)] else {
+            return nil
+        }
+        memory[venueID] = entry
+        return entry
+    }
+
+    static func store(_ entry: Entry, for venueID: Int) {
+        memory[venueID] = entry
+        var map: [String: Entry] = [:]
+        if let data = SharedAppGroup.defaults.data(forKey: key),
+           let decoded = try? JSONDecoder().decode([String: Entry].self, from: data) {
+            map = decoded
+        }
+        map[String(venueID)] = entry
+        if let data = try? JSONEncoder().encode(map) {
+            SharedAppGroup.defaults.set(data, forKey: key)
+        }
+    }
+}
+
+struct PlayerDashboard: Codable {
     let catalogEntry: PlayerCatalogEntry
     let profile: PlayerProfile.Person
     let seasonStat: PlayerStatsResponse.Split?
@@ -330,7 +544,7 @@ struct PlayerDashboard {
 
         switch sport {
         case "MLB":
-            return nil
+            return catalogEntry.preferredSportID
         case "AAA":
             return 11
         case "AA":
@@ -356,6 +570,21 @@ struct PlayerDashboard {
             return liveCode
         }
 
+        if let parentOrgID = profile.currentTeam?.parentOrgId,
+           let parentCode = TeamLogoCatalog.code(for: parentOrgID) {
+            return parentCode
+        }
+
+        if let statTeamID = seasonStat?.team?.id,
+           let statCode = TeamLogoCatalog.code(for: statTeamID) {
+            return statCode
+        }
+
+        if let statParentOrgID = seasonStat?.team?.parentOrgId,
+           let statParentCode = TeamLogoCatalog.code(for: statParentOrgID) {
+            return statParentCode
+        }
+
         return catalogEntry.teamLogoCode
     }
 
@@ -373,22 +602,41 @@ struct PlayerDashboard {
     var msuLine: String {
         return "Mississippi State \(catalogEntry.msuYears)"
     }
+
+    /// MLB franchise id (parent org for farm clubs; the club itself for big-leaguers).
+    var franchiseOrgID: Int? {
+        if let parent = profile.currentTeam?.parentOrgId { return parent }
+        if let id = profile.currentTeam?.id, TeamLogoCatalog.code(for: id) != nil { return id }
+        if let parent = seasonStat?.team?.parentOrgId { return parent }
+        if let id = seasonStat?.team?.id, TeamLogoCatalog.code(for: id) != nil { return id }
+        if let code = resolvedTeamLogoCode, let id = TeamLogoCatalog.teamID(for: code) { return id }
+        if let code = catalogEntry.teamLogoCode, let id = TeamLogoCatalog.teamID(for: code) { return id }
+        return nil
+    }
 }
 
-struct Story: Identifiable, Hashable {
+struct Story: Identifiable, Hashable, Codable {
     let id = UUID()
     let title: String
     let source: String
     let publishedText: String
     let url: URL
+
+    private enum CodingKeys: String, CodingKey {
+        case title, source, publishedText, url
+    }
 }
 
-struct HighlightVideo: Identifiable, Hashable {
+struct HighlightVideo: Identifiable, Hashable, Codable {
     let id = UUID()
     let title: String
     let source: String
     let publishedText: String
     let url: URL
+
+    private enum CodingKeys: String, CodingKey {
+        case title, source, publishedText, url
+    }
 }
 
 struct GameLogResponse: Decodable {
@@ -406,7 +654,7 @@ struct GameLogResponse: Decodable {
     }
 }
 
-struct GameLogEntry: Identifiable, Hashable {
+struct GameLogEntry: Identifiable, Hashable, Codable {
     let id = UUID()
     let dateText: String
     let opponentText: String
@@ -417,6 +665,10 @@ struct GameLogEntry: Identifiable, Hashable {
     let inningsPitched: Double?
     let strikeOuts: Int?
     let walks: Int?
+
+    private enum CodingKeys: String, CodingKey {
+        case dateText, opponentText, line, homeRuns, hits, rbi, inningsPitched, strikeOuts, walks
+    }
 }
 
 struct FormerDawgsHomeSummary {
@@ -431,6 +683,8 @@ struct FormerDawgsHomeSummary {
     let comparisonOptions: [PlayerDashboard]
     let todaySummary: TodayPerformanceSummary
     let todaysActivePlayers: [PlayerDashboard]
+    /// Players with a scheduled, live, or final game today (scoreboard).
+    let tonightScoreboard: [PlayerDashboard]
 }
 
 struct HomeStoryHighlight: Identifiable {
@@ -488,8 +742,179 @@ enum TeamLogoCatalog {
         158: "mil"
     ]
 
+    private static let namesByCode: [String: String] = [
+        "laa": "Los Angeles Angels",
+        "ari": "Arizona Diamondbacks",
+        "bal": "Baltimore Orioles",
+        "bos": "Boston Red Sox",
+        "chc": "Chicago Cubs",
+        "cin": "Cincinnati Reds",
+        "cle": "Cleveland Guardians",
+        "col": "Colorado Rockies",
+        "det": "Detroit Tigers",
+        "hou": "Houston Astros",
+        "kc": "Kansas City Royals",
+        "lad": "Los Angeles Dodgers",
+        "wsh": "Washington Nationals",
+        "nym": "New York Mets",
+        "ath": "Athletics",
+        "pit": "Pittsburgh Pirates",
+        "sd": "San Diego Padres",
+        "sea": "Seattle Mariners",
+        "sf": "San Francisco Giants",
+        "stl": "St. Louis Cardinals",
+        "tb": "Tampa Bay Rays",
+        "tex": "Texas Rangers",
+        "tor": "Toronto Blue Jays",
+        "min": "Minnesota Twins",
+        "phi": "Philadelphia Phillies",
+        "atl": "Atlanta Braves",
+        "chw": "Chicago White Sox",
+        "mia": "Miami Marlins",
+        "nyy": "New York Yankees",
+        "mil": "Milwaukee Brewers"
+    ]
+
     static func code(for teamID: Int) -> String? {
         codesByTeamID[teamID]
+    }
+
+    /// Reverse lookup for catalog logo codes when `currentTeam` is missing from the API.
+    static func teamID(for code: String) -> Int? {
+        let needle = code.lowercased()
+        return codesByTeamID.first(where: { $0.value == needle })?.key
+    }
+
+    static func franchiseName(for code: String) -> String {
+        namesByCode[code.lowercased()] ?? code.uppercased()
+    }
+
+    static func franchiseName(forTeamID teamID: Int) -> String? {
+        code(for: teamID).map(franchiseName(for:))
+    }
+}
+
+// MARK: - This Week schedule
+
+struct WeekScheduleEntry: Identifiable, Hashable {
+    let player: PlayerCatalogEntry
+    let dateKey: String
+    let game: TodayGame
+    let isFavorite: Bool
+
+    var id: String { "\(player.id)-\(dateKey)-\(game.headline)" }
+}
+
+struct WeekDayGroup: Identifiable, Hashable {
+    let dateKey: String
+    let date: Date
+    let entries: [WeekScheduleEntry]
+
+    var id: String { dateKey }
+
+    var dayTitle: String {
+        if Calendar.current.isDateInToday(date) { return "Today" }
+        if Calendar.current.isDateInTomorrow(date) { return "Tomorrow" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "EEEE"
+        return formatter.string(from: date)
+    }
+
+    var daySubtitle: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "MMM d"
+        return formatter.string(from: date)
+    }
+}
+
+// MARK: - Org depth chart
+
+struct OrgDepthPlayer: Identifiable, Hashable {
+    let player: PlayerCatalogEntry
+    let clubName: String
+    let levelLabel: String
+    let levelRank: Int
+    let isFavorite: Bool
+
+    var id: Int { player.id }
+}
+
+struct OrgDepthOrg: Identifiable, Hashable {
+    let franchiseID: Int?
+    let logoCode: String?
+    let name: String
+    let players: [OrgDepthPlayer]
+
+    var id: String { logoCode ?? name }
+
+    var mlbCount: Int { players.filter { $0.levelRank == 0 }.count }
+    var farmCount: Int { players.count - mlbCount }
+}
+
+enum OrgDepthChart {
+    /// Groups every Dawg under their MLB parent organization for call-up race views.
+    static func build(
+        players: [PlayerCatalogEntry],
+        dashboards: [PlayerDashboard] = [],
+        favoriteIDs: Set<Int> = []
+    ) -> [OrgDepthOrg] {
+        let byPlayerID = Dictionary(uniqueKeysWithValues: dashboards.map { ($0.catalogEntry.id, $0) })
+        var buckets: [String: (franchiseID: Int?, logoCode: String?, name: String, players: [OrgDepthPlayer])] = [:]
+
+        for player in players {
+            let dashboard = byPlayerID[player.id]
+            let franchiseID = dashboard?.franchiseOrgID
+                ?? player.teamLogoCode.flatMap(TeamLogoCatalog.teamID(for:))
+                ?? PlayerRuntimeStore.teamLogoCode(for: player.id).flatMap(TeamLogoCatalog.teamID(for:))
+            let logoCode = dashboard?.resolvedTeamLogoCode
+                ?? PlayerRuntimeStore.teamLogoCode(for: player.id)
+                ?? player.teamLogoCode
+            let name: String = {
+                if let logoCode { return TeamLogoCatalog.franchiseName(for: logoCode) }
+                if let franchiseID, let named = TeamLogoCatalog.franchiseName(forTeamID: franchiseID) {
+                    return named
+                }
+                return "Free Agent / Unassigned"
+            }()
+            let clubName = dashboard?.profile.currentTeam?.name
+                ?? dashboard?.seasonStat?.team?.name
+                ?? (player.effectiveIsMinorLeaguerPublic ? "\(name) farm" : name)
+            let key = logoCode ?? name
+
+            let entry = OrgDepthPlayer(
+                player: player,
+                clubName: clubName,
+                levelLabel: player.levelLabel,
+                levelRank: player.levelSortRank,
+                isFavorite: favoriteIDs.contains(player.id)
+            )
+
+            var bucket = buckets[key] ?? (franchiseID, logoCode, name, [])
+            bucket.players.append(entry)
+            if bucket.logoCode == nil { bucket.logoCode = logoCode }
+            if bucket.franchiseID == nil { bucket.franchiseID = franchiseID }
+            buckets[key] = bucket
+        }
+
+        return buckets.values.map { bucket in
+            let sortedPlayers = bucket.players.sorted { lhs, rhs in
+                if lhs.isFavorite != rhs.isFavorite { return lhs.isFavorite && !rhs.isFavorite }
+                if lhs.levelRank != rhs.levelRank { return lhs.levelRank < rhs.levelRank }
+                return lhs.player.displayName.localizedCaseInsensitiveCompare(rhs.player.displayName) == .orderedAscending
+            }
+            return OrgDepthOrg(
+                franchiseID: bucket.franchiseID,
+                logoCode: bucket.logoCode,
+                name: bucket.name,
+                players: sortedPlayers
+            )
+        }
+        .sorted { lhs, rhs in
+            if lhs.players.count != rhs.players.count { return lhs.players.count > rhs.players.count }
+            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+        }
     }
 }
 
@@ -499,6 +924,8 @@ enum PlayerRuntimeStore {
     private static let teamLogoCodeKey = "playerRuntimeTeamLogoCodes"
     private static let todayGameKey = "playerRuntimeTodayGameDates"
     private static let todaysDawgsSnapshotKey = "todaysDawgsSnapshot"
+    private static let favoritePlayerSnapshotKey = "favoritePlayerSnapshot"
+    private static let newsSnapshotKey = "newsSnapshot"
 
     private static var todayDateString: String {
         let formatter = DateFormatter()
@@ -510,13 +937,22 @@ enum PlayerRuntimeStore {
     static func saveOverride(for dashboard: PlayerDashboard) {
         let playerID = String(dashboard.catalogEntry.id)
         let defaults = SharedAppGroup.defaults
+        let isDynamicDraftee = DynamicDrafteeStore.contains(dashboard.catalogEntry.id)
 
         var sportIDs = defaults.dictionary(forKey: sportIDKey) as? [String: Int] ?? [:]
-        sportIDs[playerID] = dashboard.resolvedSportID ?? 0
+        if isDynamicDraftee, dashboard.resolvedSportID == dashboard.catalogEntry.preferredSportID {
+            sportIDs.removeValue(forKey: playerID)
+        } else {
+            sportIDs[playerID] = dashboard.resolvedSportID ?? 0
+        }
         defaults.set(sportIDs, forKey: sportIDKey)
 
         var minorStatuses = defaults.dictionary(forKey: minorStatusKey) as? [String: Bool] ?? [:]
-        minorStatuses[playerID] = dashboard.resolvedIsMinorLeaguer
+        if isDynamicDraftee {
+            minorStatuses.removeValue(forKey: playerID)
+        } else {
+            minorStatuses[playerID] = dashboard.resolvedIsMinorLeaguer
+        }
         defaults.set(minorStatuses, forKey: minorStatusKey)
 
         var teamLogoCodes = defaults.dictionary(forKey: teamLogoCodeKey) as? [String: String] ?? [:]
@@ -588,6 +1024,45 @@ enum PlayerRuntimeStore {
         }
         return snapshot
     }
+
+    static func saveHomeWidgetSnapshots(from summary: FormerDawgsHomeSummary) {
+        let favoriteSnapshot = FavoritePlayerWidgetSnapshot(
+            generatedAt: Date(),
+            player: summary.favoritesWatchlist.first.map(FavoritePlayerWidgetPlayer.init)
+        )
+        if let data = try? JSONEncoder().encode(favoriteSnapshot) {
+            SharedAppGroup.defaults.set(data, forKey: favoritePlayerSnapshotKey)
+        }
+
+        let storyHighlights = ([summary.latestPromotion, summary.latestHeadline].compactMap { $0 } + summary.transactionTimeline)
+            .reduce(into: [NewsWidgetStory]()) { stories, highlight in
+                guard !stories.contains(where: { $0.title == highlight.story.title && $0.playerName == highlight.player.displayName }) else { return }
+                stories.append(NewsWidgetStory(highlight: highlight))
+            }
+        let newsSnapshot = NewsWidgetSnapshot(
+            generatedAt: Date(),
+            stories: Array(storyHighlights.prefix(5))
+        )
+        if let data = try? JSONEncoder().encode(newsSnapshot) {
+            SharedAppGroup.defaults.set(data, forKey: newsSnapshotKey)
+        }
+    }
+
+    static func loadFavoritePlayerSnapshot() -> FavoritePlayerWidgetSnapshot {
+        guard let data = SharedAppGroup.defaults.data(forKey: favoritePlayerSnapshotKey),
+              let snapshot = try? JSONDecoder().decode(FavoritePlayerWidgetSnapshot.self, from: data) else {
+            return FavoritePlayerWidgetSnapshot(generatedAt: nil, player: nil)
+        }
+        return snapshot
+    }
+
+    static func loadNewsSnapshot() -> NewsWidgetSnapshot {
+        guard let data = SharedAppGroup.defaults.data(forKey: newsSnapshotKey),
+              let snapshot = try? JSONDecoder().decode(NewsWidgetSnapshot.self, from: data) else {
+            return NewsWidgetSnapshot(generatedAt: nil, stories: [])
+        }
+        return snapshot
+    }
 }
 
 struct DawgLiveActivityAttributes: ActivityAttributes {
@@ -638,6 +1113,92 @@ struct TodaysDawgSnapshotPlayer: Identifiable, Codable, Hashable {
         gameHeadline = dashboard.todayGame?.headline ?? "Today"
         statusText = dashboard.todayGame?.statusText ?? "Scheduled"
         isLive = dashboard.todayGame?.state == .live
+    }
+}
+
+struct FavoritePlayerWidgetSnapshot: Codable, Hashable {
+    let generatedAt: Date?
+    let player: FavoritePlayerWidgetPlayer?
+}
+
+struct FavoritePlayerWidgetPlayer: Identifiable, Codable, Hashable {
+    let id: Int
+    let name: String
+    let role: String
+    let teamLine: String
+    let levelLabel: String
+    let primaryLine: String
+    let detailLine: String
+    let isActiveToday: Bool
+
+    init(id: Int, name: String, role: String, teamLine: String, levelLabel: String, primaryLine: String, detailLine: String, isActiveToday: Bool) {
+        self.id = id
+        self.name = name
+        self.role = role
+        self.teamLine = teamLine
+        self.levelLabel = levelLabel
+        self.primaryLine = primaryLine
+        self.detailLine = detailLine
+        self.isActiveToday = isActiveToday
+    }
+
+    init(dashboard: PlayerDashboard) {
+        id = dashboard.catalogEntry.id
+        name = dashboard.catalogEntry.displayName
+        role = dashboard.catalogEntry.role
+        teamLine = dashboard.teamLine
+        levelLabel = dashboard.catalogEntry.levelLabel
+        isActiveToday = dashboard.todayGame != nil
+
+        if let todayGame = dashboard.todayGame {
+            primaryLine = todayGame.headline
+            detailLine = todayGame.statusText
+        } else if let gameLog = dashboard.gameLogs.first {
+            primaryLine = gameLog.line
+            detailLine = "\(gameLog.formattedDate) \(gameLog.opponentText)"
+        } else if let stat = dashboard.seasonStat?.stat.summary, !stat.isEmpty {
+            primaryLine = stat
+            detailLine = dashboard.msuLine
+        } else {
+            primaryLine = dashboard.msuLine
+            detailLine = "Open the app for the latest dashboard"
+        }
+    }
+}
+
+struct NewsWidgetSnapshot: Codable, Hashable {
+    let generatedAt: Date?
+    let stories: [NewsWidgetStory]
+
+    var headline: String {
+        stories.first?.title ?? "No recent Dawgs news yet"
+    }
+}
+
+struct NewsWidgetStory: Identifiable, Codable, Hashable {
+    let id: String
+    let playerName: String
+    let title: String
+    let source: String
+    let publishedText: String
+    let isPromotion: Bool
+
+    init(id: String, playerName: String, title: String, source: String, publishedText: String, isPromotion: Bool) {
+        self.id = id
+        self.playerName = playerName
+        self.title = title
+        self.source = source
+        self.publishedText = publishedText
+        self.isPromotion = isPromotion
+    }
+
+    init(highlight: HomeStoryHighlight) {
+        playerName = highlight.player.displayName
+        title = highlight.story.title
+        source = highlight.story.source
+        publishedText = highlight.story.publishedText
+        isPromotion = title.localizedCaseInsensitiveContains("promot")
+        id = "\(playerName)-\(title)-\(publishedText)"
     }
 }
 
@@ -1326,29 +1887,32 @@ extension PlayerCatalogEntry {
     fileprivate var effectiveIsMinorLeaguer: Bool {
         PlayerRuntimeStore.isMinorLeaguer(for: id) ?? isMinorLeaguer
     }
+
+    /// Public alias for views that need minor-league status outside this file.
+    var effectiveIsMinorLeaguerPublic: Bool { effectiveIsMinorLeaguer }
 }
 
 extension GameLogEntry {
-    private static let apiDateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd"
-        return f
-    }()
-
-    private static let displayDateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "MMM d"
-        return f
-    }()
-
     var formattedDate: String {
-        guard let date = Self.apiDateFormatter.date(from: dateText) else {
+        guard let date = Self.apiDateFormatter().date(from: dateText) else {
             return dateText
         }
         if Calendar.current.isDateInToday(date) { return "Today" }
         if Calendar.current.isDateInYesterday(date) { return "Yesterday" }
-        return Self.displayDateFormatter.string(from: date)
+        return Self.displayDateFormatter().string(from: date)
+    }
+
+    private static func apiDateFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }
+
+    private static func displayDateFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        return formatter
     }
 }
 
@@ -1365,5 +1929,85 @@ enum FavoritePlayerStore {
             ids.insert(playerID)
         }
         storage = ids.sorted().map(String.init).joined(separator: ",")
+    }
+}
+
+// MARK: - Trivia badges
+
+enum TriviaBadge: String, CaseIterable, Identifiable {
+    case firstCorrect = "first_correct"
+    case streak3 = "streak_3"
+    case streak7 = "streak_7"
+    case streak30 = "streak_30"
+    case correct10 = "correct_10"
+    case correct50 = "correct_50"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .firstCorrect: return "First Bark"
+        case .streak3: return "Hot Streak"
+        case .streak7: return "Week of Dawgs"
+        case .streak30: return "Iron Bulldog"
+        case .correct10: return "Trivia Vet"
+        case .correct50: return "Diamond Scholar"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .firstCorrect: return "Get a daily trivia question right"
+        case .streak3: return "3-day correct streak"
+        case .streak7: return "7-day correct streak"
+        case .streak30: return "30-day correct streak"
+        case .correct10: return "10 daily correct answers"
+        case .correct50: return "50 daily correct answers"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .firstCorrect: return "pawprint.fill"
+        case .streak3: return "flame.fill"
+        case .streak7: return "calendar"
+        case .streak30: return "shield.fill"
+        case .correct10: return "star.fill"
+        case .correct50: return "trophy.fill"
+        }
+    }
+}
+
+enum TriviaBadgeStore {
+    static func unlocked(from storage: String) -> Set<String> {
+        Set(storage.split(separator: ",").map(String.init).filter { !$0.isEmpty })
+    }
+
+    static func encode(_ badges: Set<String>) -> String {
+        badges.sorted().joined(separator: ",")
+    }
+
+    static func evaluate(
+        bestStreak: Int,
+        totalCorrect: Int,
+        unlockedStorage: inout String
+    ) -> [TriviaBadge] {
+        var unlocked = unlocked(from: unlockedStorage)
+        var newly: [TriviaBadge] = []
+
+        func unlock(_ badge: TriviaBadge) {
+            guard unlocked.insert(badge.rawValue).inserted else { return }
+            newly.append(badge)
+        }
+
+        if totalCorrect >= 1 { unlock(.firstCorrect) }
+        if bestStreak >= 3 { unlock(.streak3) }
+        if bestStreak >= 7 { unlock(.streak7) }
+        if bestStreak >= 30 { unlock(.streak30) }
+        if totalCorrect >= 10 { unlock(.correct10) }
+        if totalCorrect >= 50 { unlock(.correct50) }
+
+        unlockedStorage = encode(unlocked)
+        return newly
     }
 }

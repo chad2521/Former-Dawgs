@@ -8,12 +8,6 @@ final class StoriesService: NSObject, XMLParserDelegate {
     private var currentSource = ""
     private var currentPublished = ""
     private var insideItem = false
-    private let publishedDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss Z"
-        return formatter
-    }()
 
     func fetchStories(for player: PlayerCatalogEntry) async -> [Story] {
         do {
@@ -52,14 +46,26 @@ final class StoriesService: NSObject, XMLParserDelegate {
         var seenURLs: Set<URL> = []
         var seenTitles: Set<String> = []
 
-        for query in queries {
-            let items = try await fetchFeedItems(query: query)
+        // Run RSS queries concurrently (used to be sequential).
+        var batches: [[FeedItem]] = []
+        try await withThrowingTaskGroup(of: [FeedItem].self) { group in
+            for query in queries {
+                group.addTask {
+                    // Each StoriesService instance owns parser state; use a fresh one per query.
+                    try await StoriesService().fetchFeedItems(query: query)
+                }
+            }
+            for try await items in group {
+                batches.append(items)
+            }
+        }
+
+        for items in batches {
             for item in items {
                 let normalizedTitle = item.title.lowercased()
                 if seenURLs.contains(item.url) || seenTitles.contains(normalizedTitle) {
                     continue
                 }
-
                 seenURLs.insert(item.url)
                 seenTitles.insert(normalizedTitle)
                 mergedItems.append(item)
@@ -148,7 +154,10 @@ final class StoriesService: NSObject, XMLParserDelegate {
     }
 
     private func publishedDate(for story: Story) -> Date {
-        publishedDateFormatter.date(from: story.publishedText) ?? .distantPast
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss Z"
+        return formatter.date(from: story.publishedText) ?? .distantPast
     }
 
     private func context(for player: PlayerCatalogEntry) -> String {
@@ -170,6 +179,7 @@ final class StoriesService: NSObject, XMLParserDelegate {
             "\"\(player.displayName)\" \(context(for: player)) video"
         ]
     }
+
 }
 
 private typealias FeedItem = Story

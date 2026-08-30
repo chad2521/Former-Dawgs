@@ -91,8 +91,35 @@ struct EmptyStateView: View {
 struct HeaderLogoView: View {
     let url: URL?
     let height: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isAnimating = false
 
     var body: some View {
+        ZStack {
+            logoContent
+                .frame(maxWidth: 320)
+                .frame(height: height)
+        }
+        .frame(maxWidth: 320)
+        .frame(height: height)
+        .rotation3DEffect(
+            .degrees(reduceMotion ? 0 : (isAnimating ? 16 : -16)),
+            axis: (x: 0, y: 1, z: 0),
+            perspective: 0.45
+        )
+        .compositingGroup()
+        .shadow(color: Color.msMaroon.opacity(isAnimating && !reduceMotion ? 0.24 : 0.12), radius: 12, x: 0, y: 6)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) {
+                isAnimating = true
+            }
+        }
+        .accessibilityLabel("Mississippi State script logo")
+    }
+
+    @ViewBuilder
+    private var logoContent: some View {
         AsyncImage(url: url, transaction: Transaction(animation: .easeInOut)) { phase in
             switch phase {
             case .success(let image):
@@ -109,10 +136,8 @@ struct HeaderLogoView: View {
                 EmptyView()
             }
         }
-        .frame(maxWidth: 320)
-        .frame(height: height)
-        .accessibilityLabel("Mississippi State script logo")
     }
+
 }
 
 struct RemoteLogoImage: View {
@@ -304,14 +329,7 @@ struct BrandHeader: View {
         }
         .padding(.vertical, isWidePortrait ? 10 : (isLandscape ? 8 : 12))
         .frame(maxWidth: .infinity)
-        .background(
-            LinearGradient(
-                colors: [Color.msMaroon.opacity(0.12), Color.clear],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color.clear)
     }
 }
 

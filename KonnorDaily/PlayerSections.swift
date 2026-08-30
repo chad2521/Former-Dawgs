@@ -307,6 +307,10 @@ struct HighlightsSection: View {
     let player: PlayerCatalogEntry
     let videos: [HighlightVideo]
 
+    /// The best validated highlight resolved from the YouTube Data API.
+    @State private var resolvedVideo: HighlightVideo?
+    @State private var isResolvingVideo = false
+
     private var links: [(String, String, URL)] {
         let query = player.displayName.replacingOccurrences(of: " ", with: "+")
         return [
@@ -318,6 +322,8 @@ struct HighlightsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Highlights & Video", systemImage: "play.rectangle.fill")
+
+            topHighlight
 
             if videos.isEmpty {
                 Text("No recent direct highlight links found.")
@@ -341,6 +347,46 @@ struct HighlightsSection: View {
                 }
             }
         }
+        .task(id: player.id) {
+            await resolveHighlight()
+        }
+    }
+
+    /// The validated best highlight, shown above the raw video list when found.
+    @ViewBuilder
+    private var topHighlight: some View {
+        if let video = resolvedVideo {
+            Link(destination: video.url) {
+                RowLink(
+                    title: video.title,
+                    subtitle: "Top highlight \u{2022} \(video.publishedText)",
+                    systemImage: "star.fill"
+                )
+            }
+        } else if isResolvingVideo {
+            HStack(spacing: 6) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Finding best highlight\u{2026}")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    /// Queries the YouTube Data API for the best playable highlight for this player.
+    private func resolveHighlight() async {
+        resolvedVideo = nil
+        isResolvingVideo = true
+        defer { isResolvingVideo = false }
+
+        let best = await YouTubeHighlightService().bestHighlight(
+            for: player.displayName,
+            preferPitching: player.kind == .pitcher
+        )
+        guard !Task.isCancelled else { return }
+        resolvedVideo = best
     }
 }
 

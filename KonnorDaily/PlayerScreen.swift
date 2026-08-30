@@ -2,6 +2,8 @@ import SwiftUI
 
 struct PlayerScreen: View {
     var viewModel: DashboardViewModel
+    var onClose: (() -> Void)?
+
     @AppStorage("selectedPlayerID", store: SharedAppGroup.defaults) private var selectedPlayerID = PlayerCatalog.fallback.id
     @AppStorage("favoritePlayerIDs", store: SharedAppGroup.defaults) private var favoritePlayerIDsStorage = ""
     @State private var isShowingPlayerSelector = false
@@ -42,6 +44,13 @@ struct PlayerScreen: View {
                     await viewModel.refresh(player: selectedPlayer, forceRefresh: true)
                 }
                 .toolbar {
+                    if let onClose {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button(action: onClose) {
+                                Label("Players", systemImage: "chevron.left")
+                            }
+                        }
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             Task { await viewModel.refresh(player: selectedPlayer) }
@@ -179,9 +188,15 @@ struct PlayerScreen: View {
                     .foregroundStyle(.white.opacity(0.82))
 
                 if let lastUpdated = viewModel.lastUpdated {
-                    Text("Updated \(lastUpdated.formatted(date: .omitted, time: .shortened))")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.72))
+                    Label {
+                        Text(viewModel.isShowingCachedData
+                             ? "Offline · saved \(lastUpdated.formatted(date: .omitted, time: .shortened))"
+                             : "Updated \(lastUpdated.formatted(date: .omitted, time: .shortened))")
+                    } icon: {
+                        Image(systemName: viewModel.isShowingCachedData ? "wifi.slash" : "checkmark.circle")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.72))
                 }
             }
 

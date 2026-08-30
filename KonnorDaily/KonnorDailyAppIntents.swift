@@ -10,6 +10,8 @@ final class IntentRouter {
 
     var pendingTab: AppTab?
     var pendingPlayerID: Int?
+    /// When true, Tonight should open on the ballpark map (players playing tonight).
+    var pendingTonightMap: Bool = false
 
     private init() {}
 
@@ -17,16 +19,30 @@ final class IntentRouter {
         pendingTab = tab
     }
 
+    /// Jump to Tonight → Map of every Dawg ballpark tonight.
+    func requestTonightMap() {
+        pendingTonightMap = true
+        pendingTab = .tonight
+    }
+
     func requestPlayer(_ id: Int) {
         pendingPlayerID = id
         pendingTab = .player
     }
 
-    func consume() -> (tab: AppTab?, playerID: Int?) {
-        let result = (pendingTab, pendingPlayerID)
+    func consume() -> (tab: AppTab?, playerID: Int?, openTonightMap: Bool) {
+        let result = (pendingTab, pendingPlayerID, pendingTonightMap)
         pendingTab = nil
         pendingPlayerID = nil
+        pendingTonightMap = false
         return result
+    }
+
+    /// Consume only the Tonight map flag (tab may already be applied).
+    func consumeTonightMapRequest() -> Bool {
+        let value = pendingTonightMap
+        pendingTonightMap = false
+        return value
     }
 }
 
@@ -81,6 +97,7 @@ struct OpenTodayTriviaIntent: AppIntent {
     }
 }
 
+
 struct OpenFormerDawgIntent: AppIntent {
     static var title: LocalizedStringResource = "Open Former Dawg"
     static var description = IntentDescription("Open a Mississippi State alum's pro dashboard.")
@@ -126,7 +143,7 @@ struct ActiveDawgsTodayIntent: AppIntent {
     }
 }
 
-struct KonnorDailyShortcuts: AppShortcutsProvider {
+struct FormerDawgsShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: OpenTodayTriviaIntent(),

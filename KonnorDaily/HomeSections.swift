@@ -1,40 +1,162 @@
 import SwiftUI
 
+struct FreshDrafteesSection: View {
+    let draftees: [DynamicDraftee]
+    let action: (PlayerCatalogEntry) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Fresh Draftees", systemImage: "sparkles")
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(draftees) { draftee in
+                        Button { action(draftee.toCatalogEntry()) } label: {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Image(systemName: "baseball.fill")
+                                        .font(.caption)
+                                    Text("\(draftee.draftYear) DRAFT")
+                                        .font(.caption2.weight(.bold))
+                                    Spacer()
+                                }
+                                .foregroundStyle(.white)
+
+                                Text(draftee.fullName)
+                                    .font(.headline)
+                                    .foregroundStyle(.white)
+                                    .lineLimit(2)
+                                Text(draftee.role)
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.white.opacity(0.85))
+                                Spacer(minLength: 4)
+                                Text(draftee.pickHeadline)
+                                    .font(.caption2)
+                                    .foregroundStyle(.white.opacity(0.85))
+                                    .lineLimit(2)
+                            }
+                            .padding(14)
+                            .frame(width: 200, height: 140, alignment: .topLeading)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.msMaroon, Color(red: 0.10, green: 0.10, blue: 0.11)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+}
+
 struct HomePlayerCard: View {
     let title: String
     let systemImage: String
     let dashboard: PlayerDashboard?
     let action: (PlayerCatalogEntry) -> Void
 
+    /// The best validated highlight resolved from the YouTube Data API.
+    @State private var resolvedVideo: HighlightVideo?
+    @State private var isResolvingVideo = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: title, systemImage: systemImage)
 
             if let dashboard {
-                Button { action(dashboard.catalogEntry) } label: {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(dashboard.name)
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                        Text(dashboard.teamLine)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Text(summaryLine(for: dashboard))
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 10) {
+                    Button { action(dashboard.catalogEntry) } label: {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(dashboard.name)
+                                .font(.headline)
+                                .foregroundStyle(.primary)
+                            Text(dashboard.teamLine)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Text(summaryLine(for: dashboard))
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(16)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .buttonStyle(.plain)
+
+                    highlightLink(for: dashboard)
                 }
-                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16)
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .task(id: dashboard.catalogEntry.id) {
+                    await resolveHighlight(for: dashboard)
+                }
             } else {
                 Text("No player summary available yet.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
         }
+    }
+
+    /// Shows the validated best highlight once resolved, a loading state while
+    /// querying YouTube, and a plain search link as a fallback.
+    @ViewBuilder
+    private func highlightLink(for dashboard: PlayerDashboard) -> some View {
+        if let video = resolvedVideo {
+            Link(destination: video.url) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Label("Watch top highlight", systemImage: "play.rectangle.fill")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Color.msMaroon)
+                    Text(video.title)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+        } else if isResolvingVideo {
+            HStack(spacing: 6) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Finding best highlight\u{2026}")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        } else if let searchURL = youTubeHighlightsURL(for: dashboard) {
+            Link(destination: searchURL) {
+                Label("Search highlights on YouTube", systemImage: "magnifyingglass")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color.msMaroon)
+            }
+        }
+    }
+
+    /// Queries the YouTube Data API for the best playable highlight for this player.
+    private func resolveHighlight(for dashboard: PlayerDashboard) async {
+        resolvedVideo = nil
+        isResolvingVideo = true
+        defer { isResolvingVideo = false }
+
+        let best = await YouTubeHighlightService().bestHighlight(
+            for: dashboard.name,
+            preferPitching: dashboard.catalogEntry.kind == .pitcher
+        )
+        guard !Task.isCancelled else { return }
+        resolvedVideo = best
+    }
+
+    /// Builds a YouTube search URL for the player's highlights.
+    private func youTubeHighlightsURL(for dashboard: PlayerDashboard) -> URL? {
+        let query = "\(dashboard.name) baseball highlights"
+        guard let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+            return nil
+        }
+        return URL(string: "https://www.youtube.com/results?search_query=\(encoded)")
     }
 
     private func summaryLine(for dashboard: PlayerDashboard) -> String {

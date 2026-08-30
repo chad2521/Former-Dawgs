@@ -9,18 +9,33 @@ struct PlayerSelectorDropdown: View {
     @Binding var isExpanded: Bool
     @State private var searchText = ""
     @State private var sortOption = PlayerSortOption.name
+    @State private var rosterFilter = PlayerRosterFilter.all
+    @State private var kindFilter = PlayerKindFilter.all
+    @State private var statusFilter = PlayerStatusFilter.all
+
+    private var hasActiveFilters: Bool {
+        rosterFilter != .all || kindFilter != .all || statusFilter != .all
+    }
 
     private var filteredPlayers: [PlayerCatalogEntry] {
-        let matching: [PlayerCatalogEntry]
+        let searched: [PlayerCatalogEntry]
         if searchText.isEmpty {
-            matching = PlayerCatalog.players
+            searched = PlayerCatalog.players
         } else {
-            matching = PlayerCatalog.players.filter {
+            searched = PlayerCatalog.players.filter {
                 $0.displayName.localizedCaseInsensitiveContains(searchText) ||
                 $0.role.localizedCaseInsensitiveContains(searchText) ||
                 $0.levelLabel.localizedCaseInsensitiveContains(searchText) ||
                 $0.msuYears.localizedCaseInsensitiveContains(searchText)
             }
+        }
+
+        let activeTodayIDs = PlayerRuntimeStore.playersWithGameToday()
+        let recentDrafteeIDs = Set(DynamicDrafteeStore.recentDraftees().map(\.id))
+        let matching = searched.filter { player in
+            rosterFilter.includes(player) &&
+            kindFilter.includes(player) &&
+            statusFilter.includes(player, favoritePlayerIDs: favoritePlayerIDs, activeTodayIDs: activeTodayIDs, recentDrafteeIDs: recentDrafteeIDs)
         }
         return matching.sorted(by: sortOption.sortComparator)
     }
@@ -92,6 +107,8 @@ struct PlayerSelectorDropdown: View {
             TextField("Search players", text: $searchText)
                 .textFieldStyle(.roundedBorder)
 
+            filterControls
+
             HStack {
                 Label("Sort", systemImage: sortOption.iconName)
                     .font(.caption)
@@ -112,11 +129,80 @@ struct PlayerSelectorDropdown: View {
                 playerListSection(title: "Favorites", players: filteredFavorites)
             }
 
-            playerListSection(title: "All Players", players: filteredNonFavorites)
+            if !filteredNonFavorites.isEmpty {
+                playerListSection(title: "All Players", players: filteredNonFavorites)
+            }
+
+            if filteredPlayers.isEmpty {
+                Text("No players match these filters.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 8)
+            }
         }
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var filterControls: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Label("Filters", systemImage: "line.3.horizontal.decrease.circle")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                if hasActiveFilters {
+                    Button("Clear") {
+                        rosterFilter = .all
+                        kindFilter = .all
+                        statusFilter = .all
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.msMaroonText)
+                    .buttonStyle(.plain)
+                }
+            }
+
+            HStack {
+                Text("Roster")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                Picker("Roster level", selection: $rosterFilter) {
+                    ForEach(PlayerRosterFilter.allCases) { filter in
+                        Text(filter.title).tag(filter)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+
+            HStack(spacing: 10) {
+                Picker("Player type", selection: $kindFilter) {
+                    ForEach(PlayerKindFilter.allCases) { filter in
+                        Text(filter.title).tag(filter)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Picker("Status", selection: $statusFilter) {
+                    ForEach(PlayerStatusFilter.allCases) { filter in
+                        Label(filter.title, systemImage: filter.iconName).tag(filter)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+        }
+        .padding(12)
+        .background(Color(.tertiarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
     @ViewBuilder
@@ -219,5 +305,116 @@ private extension View {
             .padding(14)
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+}
+
+enum PlayerRosterFilter: String, CaseIterable, Identifiable {
+    case all
+    case mlb
+    case minors
+    case tripleA
+    case doubleA
+    case highA
+    case singleA
+    case rookie
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .all: "All"
+        case .mlb: "MLB"
+        case .minors: "MiLB"
+        case .tripleA: "AAA"
+        case .doubleA: "AA"
+        case .highA: "High-A"
+        case .singleA: "A"
+        case .rookie: "Rookie"
+        }
+    }
+
+    func includes(_ player: PlayerCatalogEntry) -> Bool {
+        switch self {
+        case .all:
+            true
+        case .mlb:
+            player.levelLabel == "MLB"
+        case .minors:
+            player.levelLabel != "MLB"
+        case .tripleA:
+            player.levelLabel == "Triple-A"
+        case .doubleA:
+            player.levelLabel == "Double-A"
+        case .highA:
+            player.levelLabel == "High-A"
+        case .singleA:
+            player.levelLabel == "Single-A"
+        case .rookie:
+            player.levelLabel == "Rookie"
+        }
+    }
+}
+
+enum PlayerKindFilter: String, CaseIterable, Identifiable {
+    case all
+    case hitters
+    case pitchers
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .all: "All Roles"
+        case .hitters: "Hitters"
+        case .pitchers: "Pitchers"
+        }
+    }
+
+    func includes(_ player: PlayerCatalogEntry) -> Bool {
+        switch self {
+        case .all: true
+        case .hitters: player.kind == .hitter
+        case .pitchers: player.kind == .pitcher
+        }
+    }
+}
+
+enum PlayerStatusFilter: String, CaseIterable, Identifiable {
+    case all
+    case favorites
+    case activeToday
+    case recentDraftees
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .all: "Any Status"
+        case .favorites: "Favorites"
+        case .activeToday: "Active Today"
+        case .recentDraftees: "Recent Draft"
+        }
+    }
+
+    var iconName: String {
+        switch self {
+        case .all: "circle.grid.2x2"
+        case .favorites: "star.fill"
+        case .activeToday: "calendar.badge.clock"
+        case .recentDraftees: "sparkles"
+        }
+    }
+
+    func includes(_ player: PlayerCatalogEntry, favoritePlayerIDs: Set<Int>, activeTodayIDs: Set<Int>, recentDrafteeIDs: Set<Int>) -> Bool {
+        switch self {
+        case .all:
+            true
+        case .favorites:
+            favoritePlayerIDs.contains(player.id)
+        case .activeToday:
+            activeTodayIDs.contains(player.id)
+        case .recentDraftees:
+            recentDrafteeIDs.contains(player.id)
+        }
     }
 }

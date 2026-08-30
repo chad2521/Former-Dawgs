@@ -14,6 +14,8 @@
 		1A2B3C4D5E6F708190A0B0C5 /* StoriesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A5 /* StoriesService.swift */; };
 		1A2B3C4D5E6F708190A0B0C6 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A6 /* DashboardViewModel.swift */; };
 		1A2B3C4D5E6F708190A0B0C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A8 /* Assets.xcassets */; };
+		7E38EDB22FF4A16B00EF0B00 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */; };
+		7E3A77EA302AB0C100B3E49B /* YouTubeHighlightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E3A77E9302AB0C100B3E49B /* YouTubeHighlightService.swift */; };
 		7E47326E2FB4A42D003CB8BE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47326D2FB4A42C003CB8BE /* Theme.swift */; };
 		7E4732702FB4A42F003CB8BE /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47326F2FB4A42F003CB8BE /* SharedComponents.swift */; };
 		7E4732722FB4A430003CB8BE /* PlayerSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4732712FB4A430003CB8BE /* PlayerSelectorView.swift */; };
@@ -22,6 +24,7 @@
 		7E4732782FB4A436003CB8BE /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4732772FB4A436003CB8BE /* HomeScreen.swift */; };
 		7E47327A2FB4A437003CB8BE /* PlayerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4732792FB4A437003CB8BE /* PlayerScreen.swift */; };
 		7E47327C2FB4A438003CB8BE /* TriviaScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47327B2FB4A438003CB8BE /* TriviaScreen.swift */; };
+		7E9712E42FF5E88400229F02 /* BrowseScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E9712E32FF5E88400229F02 /* BrowseScreen.swift */; };
 		7EA237152FDF23CF008DB35A /* DawgLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA237142FDF23CF008DB35A /* DawgLiveActivityManager.swift */; };
 		7EA2371B2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA2371A2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift */; };
 		7EBAEFB22FC892E300AC5595 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EBAEFB12FC892E300AC5595 /* WidgetKit.framework */; };
@@ -29,7 +32,16 @@
 		7EBAEFC52FC892E400AC5595 /* KonnorDailyWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7EBAEFAF2FC892E300AC5595 /* KonnorDailyWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7EBAEFD02FC892E400AC5595 /* PlayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A0B0A3 /* PlayerModels.swift */; };
 		7EBAEFEC2FCA09BB00AC5595 /* KonnorDailyAppIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EBAEFEB2FCA09BA00AC5595 /* KonnorDailyAppIntents.swift */; };
+		7EC87A602FEB77EC00AE0200 /* DraftService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC87A5F2FEB77EC00AE0200 /* DraftService.swift */; };
+		7EC87A622FEB780300AE0200 /* DynamicDrafteeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC87A612FEB780300AE0200 /* DynamicDrafteeStore.swift */; };
+		7EC87A642FEB784200AE0200 /* DraftWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC87A632FEB784200AE0200 /* DraftWatcher.swift */; };
 		7EF0A0012FCA100000000001 /* KonnorDailyWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 7EF0A0022FCA100000000002 /* KonnorDailyWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7EF1A0012A0B000100000001 /* TonightScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1A0012A0B0001000000A1 /* TonightScreen.swift */; };
+		7EF4D0012A0E000100000001 /* StadiumFlyoverHero.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF4D0012A0E0001000000A1 /* StadiumFlyoverHero.swift */; };
+		7EF5E0012A0F000100000001 /* CowbellScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF5E0012A0F0001000000A1 /* CowbellScreen.swift */; };
+		7EF5E0012A0F000100000002 /* cowbell.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7EF5E0012A0F0001000000A2 /* cowbell.wav */; };
+		7EF5E0012A0F000100000003 /* state_script.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EF5E0012A0F0001000000A3 /* state_script.png */; };
+		7EF6F0012A10000100000001 /* HeadsUpGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF6F0012A100001000000A1 /* HeadsUpGame.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +96,8 @@
 		1A2B3C4D5E6F708190A0B0A6 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F708190A0B0A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1A2B3C4D5E6F708190A0B0A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
+		7E3A77E9302AB0C100B3E49B /* YouTubeHighlightService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubeHighlightService.swift; sourceTree = "<group>"; };
 		7E47326D2FB4A42C003CB8BE /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		7E47326F2FB4A42F003CB8BE /* SharedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedComponents.swift; sourceTree = "<group>"; };
 		7E4732712FB4A430003CB8BE /* PlayerSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSelectorView.swift; sourceTree = "<group>"; };
@@ -92,13 +106,23 @@
 		7E4732772FB4A436003CB8BE /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		7E4732792FB4A437003CB8BE /* PlayerScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerScreen.swift; sourceTree = "<group>"; };
 		7E47327B2FB4A438003CB8BE /* TriviaScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriviaScreen.swift; sourceTree = "<group>"; };
+		7E9712E32FF5E88400229F02 /* BrowseScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseScreen.swift; sourceTree = "<group>"; };
 		7EA237142FDF23CF008DB35A /* DawgLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DawgLiveActivityManager.swift; sourceTree = "<group>"; };
 		7EA2371A2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshScheduler.swift; sourceTree = "<group>"; };
 		7EBAEFAF2FC892E300AC5595 /* KonnorDailyWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KonnorDailyWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EBAEFB12FC892E300AC5595 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		7EBAEFB32FC892E300AC5595 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		7EBAEFEB2FCA09BA00AC5595 /* KonnorDailyAppIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KonnorDailyAppIntents.swift; sourceTree = "<group>"; };
+		7EC87A5F2FEB77EC00AE0200 /* DraftService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftService.swift; sourceTree = "<group>"; };
+		7EC87A612FEB780300AE0200 /* DynamicDrafteeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicDrafteeStore.swift; sourceTree = "<group>"; };
+		7EC87A632FEB784200AE0200 /* DraftWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftWatcher.swift; sourceTree = "<group>"; };
 		7EF0A0022FCA100000000002 /* KonnorDailyWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KonnorDailyWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EF1A0012A0B0001000000A1 /* TonightScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightScreen.swift; sourceTree = "<group>"; };
+		7EF4D0012A0E0001000000A1 /* StadiumFlyoverHero.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StadiumFlyoverHero.swift; sourceTree = "<group>"; };
+		7EF5E0012A0F0001000000A1 /* CowbellScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CowbellScreen.swift; sourceTree = "<group>"; };
+		7EF5E0012A0F0001000000A2 /* cowbell.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = cowbell.wav; path = Resources/cowbell.wav; sourceTree = "<group>"; };
+		7EF5E0012A0F0001000000A3 /* state_script.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = state_script.png; path = Resources/state_script.png; sourceTree = "<group>"; };
+		7EF6F0012A100001000000A1 /* HeadsUpGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadsUpGame.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -176,6 +200,18 @@
 				7EBAEFEB2FCA09BA00AC5595 /* KonnorDailyAppIntents.swift */,
 				7EA237142FDF23CF008DB35A /* DawgLiveActivityManager.swift */,
 				7EA2371A2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift */,
+				7EC87A5F2FEB77EC00AE0200 /* DraftService.swift */,
+				7EC87A612FEB780300AE0200 /* DynamicDrafteeStore.swift */,
+				7EC87A632FEB784200AE0200 /* DraftWatcher.swift */,
+				7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */,
+				7E9712E32FF5E88400229F02 /* BrowseScreen.swift */,
+				7EF1A0012A0B0001000000A1 /* TonightScreen.swift */,
+				7EF4D0012A0E0001000000A1 /* StadiumFlyoverHero.swift */,
+				7EF5E0012A0F0001000000A2 /* cowbell.wav */,
+				7EF5E0012A0F0001000000A3 /* state_script.png */,
+				7EF5E0012A0F0001000000A1 /* CowbellScreen.swift */,
+				7EF6F0012A100001000000A1 /* HeadsUpGame.swift */,
+				7E3A77E9302AB0C100B3E49B /* YouTubeHighlightService.swift */,
 			);
 			path = KonnorDaily;
 			sourceTree = "<group>";
@@ -275,7 +311,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2650;
-				LastUpgradeCheck = 2650;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					1A2B3C4D5E6F708190A0B006 = {
 						CreatedOnToolsVersion = 15.3;
@@ -333,6 +369,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A2B3C4D5E6F708190A0B0C7 /* Assets.xcassets in Resources */,
+				7EF5E0012A0F000100000002 /* cowbell.wav in Resources */,
+				7EF5E0012A0F000100000003 /* state_script.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,21 +397,31 @@
 			files = (
 				1A2B3C4D5E6F708190A0B0C1 /* KonnorDailyApp.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C2 /* ContentView.swift in Sources */,
+				7E3A77EA302AB0C100B3E49B /* YouTubeHighlightService.swift in Sources */,
 				7E4732742FB4A431003CB8BE /* HomeSections.swift in Sources */,
+				7E9712E42FF5E88400229F02 /* BrowseScreen.swift in Sources */,
 				7EA237152FDF23CF008DB35A /* DawgLiveActivityManager.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C3 /* PlayerModels.swift in Sources */,
 				7E47327A2FB4A437003CB8BE /* PlayerScreen.swift in Sources */,
 				7E4732762FB4A434003CB8BE /* PlayerSections.swift in Sources */,
+				7EC87A622FEB780300AE0200 /* DynamicDrafteeStore.swift in Sources */,
+				7EC87A642FEB784200AE0200 /* DraftWatcher.swift in Sources */,
 				7E4732722FB4A430003CB8BE /* PlayerSelectorView.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C4 /* PlayerService.swift in Sources */,
 				7E47327C2FB4A438003CB8BE /* TriviaScreen.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C5 /* StoriesService.swift in Sources */,
 				7E4732782FB4A436003CB8BE /* HomeScreen.swift in Sources */,
+				7E38EDB22FF4A16B00EF0B00 /* OfflineCache.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C6 /* DashboardViewModel.swift in Sources */,
 				7E4732702FB4A42F003CB8BE /* SharedComponents.swift in Sources */,
 				7EBAEFEC2FCA09BB00AC5595 /* KonnorDailyAppIntents.swift in Sources */,
 				7E47326E2FB4A42D003CB8BE /* Theme.swift in Sources */,
 				7EA2371B2FDF24C6008DB35A /* BackgroundRefreshScheduler.swift in Sources */,
+				7EC87A602FEB77EC00AE0200 /* DraftService.swift in Sources */,
+				7EF1A0012A0B000100000001 /* TonightScreen.swift in Sources */,
+				7EF4D0012A0E000100000001 /* StadiumFlyoverHero.swift in Sources */,
+				7EF5E0012A0F000100000001 /* CowbellScreen.swift in Sources */,
+				7EF6F0012A10000100000001 /* HeadsUpGame.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,6 +460,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -475,6 +524,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -534,7 +584,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = KonnorDaily/KonnorDaily.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 12;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = KonnorDaily/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Former Dawgs";
@@ -548,7 +598,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -567,7 +617,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = KonnorDaily/KonnorDaily.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 12;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = KonnorDaily/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Former Dawgs";
@@ -581,7 +631,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -601,7 +651,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = KonnorDailyWidget/KonnorDailyWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 12;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = KonnorDailyWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = KonnorDailyWidget;
@@ -613,7 +663,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.KonnorDailyWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -635,7 +685,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = KonnorDailyWidget/KonnorDailyWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 12;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = KonnorDailyWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = KonnorDailyWidget;
@@ -647,7 +697,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.KonnorDailyWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -665,8 +715,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "KonnorDailyWatch Watch App/KonnorDailyWatch Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 12;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = KonnorDailyWatch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -675,7 +726,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -693,8 +744,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "KonnorDailyWatch Watch App/KonnorDailyWatch Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 12;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = KonnorDailyWatch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -703,7 +755,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;

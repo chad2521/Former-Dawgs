@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct KonnorDailyWatchApp: App {
+struct FormerDawgsWatchApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
