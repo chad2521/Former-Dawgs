@@ -90,7 +90,7 @@
 		7EF0A0052FCA100000000005 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
 				7EF0A0012FCA100000000001 /* KonnorDailyWatch Watch App.app in Embed Watch Content */,
@@ -101,7 +101,7 @@
 		A1C11F012FCC11F000000006 /* Embed App Clips */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = AppClips;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/AppClips";
 			dstSubfolderSpec = 16;
 			files = (
 				A1C11F012FCC11F000000005 /* FormerDawgsClip.app in Embed App Clips */,
