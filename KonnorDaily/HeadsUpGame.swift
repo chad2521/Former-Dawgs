@@ -70,7 +70,7 @@ enum HeadsUpCatalog {
             "Kendall Graveman", "Paul Maholm", "Buck Showalter", "Tyler Moore",
             "Ed Easley", "Logan Tanner", "Landon Sims", "Will Bednar",
             "Tanner Allen", "Rowdey Jordan", "Brad Cumbest", "Kamren James",
-            "Dakota Jordan", "Jurrangelo Cijntje", "Konnor Griffin", "Hunter Hines",
+            "Dakota Jordan", "Jurrangelo Cijntje", "J.T. Ginn", "Hunter Hines",
             "Colton Ledbetter", "Connor Hujsak", "Amani Larry", "Luke Hancock"
         ]
         list += formerDawgs.map { card(.formerDawgs, $0) }
@@ -111,7 +111,7 @@ enum HeadsUpCatalog {
         let baseball = [
             "Dudy Noble Field", "Polk-DeMent Stadium", "Ron Polk", "Chris Lemonis",
             "John Cohen", "2021 National Champs", "College World Series",
-            "Will Bednar", "Landon Sims", "Tanner Allen", "Konnor Griffin",
+            "Will Bednar", "Landon Sims", "Tanner Allen", "Brent Rooker",
             "Left Field Lounge", "Super Bulldogs", "SEC Baseball",
             "Vanderbilt Sweep", "Omaha", "Baseball Maroon", "The Dude",
             "Houston Harding", "Jackson Fristoe", "Rowdey Jordan", "Logan Tanner",

@@ -156,7 +156,10 @@ enum DynamicDrafteeStore {
 
     static func loadAll() -> [DynamicDraftee] {
         guard let data = SharedAppGroup.defaults.data(forKey: storageKey) else { return [] }
-        return (try? JSONDecoder().decode([DynamicDraftee].self, from: data)) ?? []
+        let decoded = (try? JSONDecoder().decode([DynamicDraftee].self, from: data)) ?? []
+        let kept = decoded.filter { !PlayerCatalog.excludedPlayerIDs.contains($0.id) }
+        if kept.count != decoded.count { save(kept) }
+        return kept
     }
 
     static func save(_ list: [DynamicDraftee]) {
@@ -187,8 +190,13 @@ struct PlayerCatalogEntry: Identifiable, Hashable, Codable {
 }
 
 enum PlayerCatalog {
+    /// Players who never played at Mississippi State and must not appear in the app.
+    static let excludedPlayerIDs: Set<Int> = [
+        804606 // Konnor Griffin
+    ]
+
     static var staticPlayers: [PlayerCatalogEntry] {
-        rawPlayers.sorted {
+        rawPlayers.filter { !excludedPlayerIDs.contains($0.id) }.sorted {
             $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
         }
     }
@@ -196,9 +204,11 @@ enum PlayerCatalog {
     static var players: [PlayerCatalogEntry] {
         let staticIDs = Set(rawPlayers.map(\.id))
         let dynamic = DynamicDrafteeStore.loadAll()
-            .filter { !staticIDs.contains($0.id) }
+            .filter { !staticIDs.contains($0.id) && !excludedPlayerIDs.contains($0.id) }
             .map { $0.toCatalogEntry() }
-        return (rawPlayers + dynamic).sorted {
+        return (rawPlayers + dynamic)
+            .filter { !excludedPlayerIDs.contains($0.id) }
+            .sorted {
             $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
         }
     }
@@ -208,7 +218,8 @@ enum PlayerCatalog {
     }
 
     static func player(for id: Int) -> PlayerCatalogEntry {
-        players.first { $0.id == id } ?? fallback
+        guard !excludedPlayerIDs.contains(id) else { return fallback }
+        return players.first { $0.id == id } ?? fallback
     }
 
     private static let rawPlayers: [PlayerCatalogEntry] = [
@@ -394,6 +405,11 @@ struct TodayGame: Hashable, Codable {
 
     var hasMapCoordinate: Bool {
         latitude != nil && longitude != nil
+    }
+
+    /// Dawg team first, then opponent: "5-3"
+    var scoreLine: String {
+        formatScore()
     }
 
     private func formatScore() -> String {

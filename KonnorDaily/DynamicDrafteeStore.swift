@@ -8,7 +8,7 @@ extension DynamicDrafteeStore {
         let staticIDs = Set(PlayerCatalog.staticPlayers.map(\.id))
 
         var newlyAdded: [DynamicDraftee] = []
-        for pick in picks where !existingIDs.contains(pick.id) && !staticIDs.contains(pick.id) {
+        for pick in picks where !existingIDs.contains(pick.id) && !staticIDs.contains(pick.id) && !PlayerCatalog.excludedPlayerIDs.contains(pick.id) {
             let entry = DynamicDraftee.from(pick)
             existing.append(entry)
             newlyAdded.append(entry)

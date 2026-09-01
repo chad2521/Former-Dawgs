@@ -22,6 +22,55 @@ final class StoriesService {
         return []
     }
 
+    /// League-wide MLB/MiLB transactions for the whole roster (a few HTTP calls).
+    /// Used by Home so a call-up is not missed just because the player was not
+    /// in the previous top-10 story fetch.
+    func fetchRecentRosterStories(playerIDs: Set<Int>) async -> [Int: [Story]] {
+        guard !playerIDs.isEmpty else { return [:] }
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "America/New_York") ?? .current
+        let end = Date()
+        let start = calendar.date(byAdding: .day, value: -21, to: end) ?? end
+        let startText = apiDateString(from: start)
+        let endText = apiDateString(from: end)
+        let sportIDs = [1, 11, 12, 13, 14]
+
+        var grouped: [Int: [Story]] = [:]
+        await withTaskGroup(of: [Int: [Story]].self) { group in
+            for sportID in sportIDs {
+                group.addTask {
+                    (try? await StoriesService().fetchLeagueTransactions(
+                        playerIDs: playerIDs,
+                        sportID: sportID,
+                        startDate: startText,
+                        endDate: endText
+                    )) ?? [:]
+                }
+            }
+            for await batch in group {
+                for (playerID, stories) in batch {
+                    grouped[playerID, default: []].append(contentsOf: stories)
+                }
+            }
+        }
+
+        var result: [Int: [Story]] = [:]
+        result.reserveCapacity(grouped.count)
+        for (playerID, stories) in grouped {
+            var seen = Set<String>()
+            let unique = stories
+                .sorted { publishedSortKey($0.publishedText) > publishedSortKey($1.publishedText) }
+                .filter { story in
+                    seen.insert(story.title.lowercased()).inserted
+                }
+            if !unique.isEmpty {
+                result[playerID] = Array(unique.prefix(8))
+            }
+        }
+        return result
+    }
+
     private func fetchTransactions(for player: PlayerCatalogEntry) async -> [Story] {
         var sportIDs: [Int] = [1]
         if let preferred = player.preferredSportID, preferred != 1 {
@@ -81,16 +130,7 @@ final class StoriesService {
         let pageURL = playerPageURL(for: player)
 
         let stories: [Story] = response.transactions.compactMap { item in
-            let title = (item.description?.trimmingCharacters(in: .whitespacesAndNewlines)).flatMap { $0.isEmpty ? nil : $0 }
-                ?? item.typeDesc
-                ?? "Roster move"
-            let published = item.effectiveDate ?? item.date ?? ""
-            return Story(
-                title: title,
-                source: "MLB",
-                publishedText: published,
-                url: pageURL
-            )
+            story(from: item, url: pageURL)
         }
 
         var seen = Set<String>()
@@ -99,6 +139,47 @@ final class StoriesService {
             return seen.insert(key).inserted
         }
         return Array(unique.prefix(8))
+    }
+
+    private func fetchLeagueTransactions(
+        playerIDs: Set<Int>,
+        sportID: Int,
+        startDate: String,
+        endDate: String
+    ) async throws -> [Int: [Story]] {
+        var components = URLComponents(string: "https://statsapi.mlb.com/api/v1/transactions")!
+        components.queryItems = [
+            URLQueryItem(name: "sportId", value: String(sportID)),
+            URLQueryItem(name: "startDate", value: startDate),
+            URLQueryItem(name: "endDate", value: endDate)
+        ]
+
+        let (data, _) = try await URLSession.shared.data(from: components.url!)
+        let response = try JSONDecoder().decode(TransactionsResponse.self, from: data)
+        let isMinor = sportID != 1
+
+        var grouped: [Int: [Story]] = [:]
+        for item in response.transactions {
+            guard let playerID = item.person?.id, playerIDs.contains(playerID) else { continue }
+            guard let mapped = story(from: item, url: playerPageURL(playerID: playerID, isMinor: isMinor)) else {
+                continue
+            }
+            grouped[playerID, default: []].append(mapped)
+        }
+        return grouped
+    }
+
+    private func story(from item: TransactionsResponse.Item, url: URL) -> Story? {
+        let title = (item.description?.trimmingCharacters(in: .whitespacesAndNewlines)).flatMap { $0.isEmpty ? nil : $0 }
+            ?? item.typeDesc
+            ?? "Roster move"
+        let published = item.effectiveDate ?? item.date ?? ""
+        return Story(
+            title: title,
+            source: "MLB",
+            publishedText: published,
+            url: url
+        )
     }
 
     private func fallbackPlayerPageStories(for player: PlayerCatalogEntry) -> [Story] {
@@ -121,7 +202,13 @@ final class StoriesService {
             .replacingOccurrences(of: " ", with: "-")
         let host = player.effectiveIsMinorLeaguerPublic ? "www.milb.com" : "www.mlb.com"
         return URL(string: "https://\(host)/player/\(slug)-\(player.id)")
-            ?? URL(string: "https://www.mlb.com/player/\(player.id)")!
+            ?? playerPageURL(playerID: player.id, isMinor: player.effectiveIsMinorLeaguerPublic)
+    }
+
+    private func playerPageURL(playerID: Int, isMinor: Bool) -> URL {
+        let host = isMinor ? "www.milb.com" : "www.mlb.com"
+        return URL(string: "https://\(host)/player/\(playerID)")
+            ?? URL(string: "https://www.mlb.com/player/\(playerID)")!
     }
 
     private func apiDateString(from date: Date) -> String {
@@ -130,6 +217,13 @@ final class StoriesService {
         formatter.timeZone = TimeZone(identifier: "America/New_York")
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: date)
+    }
+
+    private func publishedSortKey(_ value: String) -> String {
+        if value.count >= 10 {
+            return String(value.prefix(10))
+        }
+        return value
     }
 }
 
@@ -141,5 +235,10 @@ private struct TransactionsResponse: Decodable {
         let effectiveDate: String?
         let typeDesc: String?
         let description: String?
+        let person: Person?
+
+        struct Person: Decodable {
+            let id: Int?
+        }
     }
 }

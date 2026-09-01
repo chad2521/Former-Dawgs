@@ -189,6 +189,14 @@ struct HomeScreen: View {
 
     @ViewBuilder
     private func homeContent(summary: FormerDawgsHomeSummary, usesMultiColumn: Bool) -> some View {
+        HomeLiveGamesSection(
+            scoreboard: summary.tonightScoreboard,
+            favoritePlayerIDs: favoritePlayerIDs,
+            onSelectPlayer: onSelectPlayer,
+            onOpenTonight: onOpenTonightMap,
+            onTrack: { DawgLiveActivityManager.shared.startOrUpdate(for: $0) }
+        )
+
         if usesMultiColumn {
             LazyVGrid(
                 columns: [
@@ -215,8 +223,11 @@ struct HomeScreen: View {
             FreshDrafteesSection(draftees: recentDraftees, action: onSelectPlayer)
         }
 
-        TodaysActivePlayersSection(dashboards: summary.todaysActivePlayers, action: onSelectPlayer)
-        TodaySummarySection(summary: summary.todaySummary, action: onSelectPlayer)
+        TodaysDawgsSection(
+            summary: summary.todaySummary,
+            activePlayers: summary.todaysActivePlayers,
+            action: onSelectPlayer
+        )
         WeeklyLeadersSection(title: "Weekly Hitter Leaders", entries: summary.weeklyHitterLeaders, action: onSelectPlayer)
         WeeklyLeadersSection(title: "Weekly Pitcher Leaders", entries: summary.weeklyPitcherLeaders, action: onSelectPlayer)
         TransactionTimelineSection(highlights: summary.transactionTimeline, action: onSelectPlayer)

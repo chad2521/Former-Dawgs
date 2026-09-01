@@ -484,7 +484,9 @@ struct PlayerService {
         )
         let dashboards: [PlayerDashboard]
         if includeHomeStories {
-            dashboards = await enrichHomeStories(loaded.dashboards)
+            let playerIDs = Set(loaded.dashboards.map(\.catalogEntry.id))
+            let rosterStories = await StoriesService().fetchRecentRosterStories(playerIDs: playerIDs)
+            dashboards = await overlayRosterStories(rosterStories, onto: loaded.dashboards)
         } else {
             dashboards = loaded.dashboards
         }
@@ -503,7 +505,9 @@ struct PlayerService {
         )
         let sortedStories = dashboards
             .flatMap { dashboard in
-                dashboard.stories.map { HomeStoryHighlight(player: dashboard.catalogEntry, story: $0) }
+                dashboard.stories
+                    .filter { !isOfficialPlayerPageStory($0) }
+                    .map { HomeStoryHighlight(player: dashboard.catalogEntry, story: $0) }
             }
             .sorted { lhs, rhs in
                 storyPublishedDate(for: lhs.story) > storyPublishedDate(for: rhs.story)
@@ -517,10 +521,10 @@ struct PlayerService {
         return FormerDawgsHomeSummary(
             hottestHitter: dashboards
                 .filter { $0.catalogEntry.kind == .hitter }
-                .max(by: { weeklyPerformanceScore($0) < weeklyPerformanceScore($1) }),
+                .max(by: { hottestCardScore($0) < hottestCardScore($1) }),
             hottestPitcher: dashboards
                 .filter { $0.catalogEntry.kind == .pitcher }
-                .max(by: { weeklyPerformanceScore($0) < weeklyPerformanceScore($1) }),
+                .max(by: { hottestCardScore($0) < hottestCardScore($1) }),
             latestPromotion: sortedStories.first(where: isPromotionStory),
             latestHeadline: sortedStories.first,
             weeklyHitterLeaders: weeklyLeaders(from: dashboards, kind: .hitter),
@@ -552,46 +556,18 @@ struct PlayerService {
         )
     }
 
-    /// Pull MLB transactions/headlines only for favorites / active / top performers (not the full roster).
-    private func enrichHomeStories(_ dashboards: [PlayerDashboard]) async -> [PlayerDashboard] {
-        let favoriteIDs = Set(
-            (SharedAppGroup.defaults.string(forKey: "favoritePlayerIDs") ?? "")
-                .split(separator: ",")
-                .compactMap { Int($0) }
-        )
-
-        let priority = dashboards.sorted { lhs, rhs in
-            let lScore = homeStoryPriorityScore(lhs, favoriteIDs: favoriteIDs)
-            let rScore = homeStoryPriorityScore(rhs, favoriteIDs: favoriteIDs)
-            if lScore != rScore { return lScore > rScore }
-            return lhs.catalogEntry.displayName < rhs.catalogEntry.displayName
-        }
-        let targets = Array(priority.prefix(10))
-
-        var storyMap: [Int: [Story]] = [:]
-        await withTaskGroup(of: (Int, [Story]).self) { group in
-            for dashboard in targets {
-                // Skip network if we already have recent stories on the dashboard.
-                if !dashboard.stories.isEmpty { continue }
-                let player = dashboard.catalogEntry
-                group.addTask {
-                    let stories = await StoriesService().fetchStories(for: player)
-                    return (player.id, stories)
-                }
-            }
-            for await (id, stories) in group {
-                if !stories.isEmpty {
-                    storyMap[id] = stories
-                }
-            }
-        }
-
+    /// Replace cached Home stories with live league-wide MLB transactions.
+    /// Always overlays matching players — cached non-empty stories do not skip the refresh.
+    private func overlayRosterStories(
+        _ storyMap: [Int: [Story]],
+        onto dashboards: [PlayerDashboard]
+    ) async -> [PlayerDashboard] {
         guard !storyMap.isEmpty else { return dashboards }
 
         var updatedDashboards: [PlayerDashboard] = []
         updatedDashboards.reserveCapacity(dashboards.count)
         for dashboard in dashboards {
-            guard let stories = storyMap[dashboard.catalogEntry.id] else {
+            guard let stories = storyMap[dashboard.catalogEntry.id], !stories.isEmpty else {
                 updatedDashboards.append(dashboard)
                 continue
             }
@@ -608,15 +584,6 @@ struct PlayerService {
             updatedDashboards.append(updated)
         }
         return updatedDashboards
-    }
-
-    private func homeStoryPriorityScore(_ dashboard: PlayerDashboard, favoriteIDs: Set<Int>) -> Double {
-        var score = 0.0
-        if favoriteIDs.contains(dashboard.catalogEntry.id) { score += 100 }
-        if isActiveToday(dashboard) { score += 50 }
-        if dashboard.todayGame != nil { score += 25 }
-        score += weeklyPerformanceScore(dashboard)
-        return score
     }
 
     private func fetchProfile(playerID: Int) async throws -> PlayerProfile {
@@ -894,13 +861,23 @@ struct PlayerService {
         Double(value ?? "") ?? 0
     }
 
+    private func isOfficialPlayerPageStory(_ story: Story) -> Bool {
+        let title = story.title.lowercased()
+        return title.contains("official") && title.contains("player page")
+    }
+
     private func isPromotionStory(_ highlight: HomeStoryHighlight) -> Bool {
         let title = highlight.story.title.lowercased()
         return title.contains("promot")
+            || title.contains("promoted")
             || title.contains("called up")
             || title.contains("call-up")
+            || title.contains("call up")
             || title.contains("selects the contract")
             || title.contains("selected the contract")
+            || title.contains("selected")
+            || title.contains("recalled")
+            || title.contains("rehab assignment")
             || title.contains("joins ")
             || title.contains("assigned to")
     }
@@ -968,6 +945,17 @@ struct PlayerService {
 
     private func weeklyPerformanceScore(_ dashboard: PlayerDashboard) -> Double {
         weeklyLeaderboardEntry(for: dashboard)?.score ?? -.greatestFiniteMagnitude
+    }
+
+    /// Prefer last-7-day game logs; fall back to season hitter/pitcher score when weekly logs are empty.
+    private func hottestCardScore(_ dashboard: PlayerDashboard) -> Double {
+        let weekly = weeklyPerformanceScore(dashboard)
+        if weekly != -.greatestFiniteMagnitude, weekly.isFinite {
+            return weekly
+        }
+        return dashboard.catalogEntry.kind == .pitcher
+            ? pitcherScore(dashboard)
+            : hitterScore(dashboard)
     }
 
     private func weeklyLeaderboardEntry(for dashboard: PlayerDashboard) -> HomeLeaderboardEntry? {

@@ -1,10 +1,10 @@
 # Diamond Dawgs
 
-A small SwiftUI iOS app for checking Konnor Griffin plus former Mississippi State baseball players.
+A small SwiftUI iOS app for checking former Mississippi State baseball players.
 
 ## What it does
 
-- Lets you switch between Konnor Griffin and former Mississippi State players.
+- Lets you browse former Mississippi State players in MLB and the minors.
 - Shows each player's current MLB profile from MLB Stats API.
 - Loads current season hitting or pitching stats depending on the player.
 - Lists recent story links from a Google News RSS search for that player.
