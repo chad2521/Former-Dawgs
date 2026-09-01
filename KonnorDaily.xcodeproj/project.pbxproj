@@ -48,6 +48,7 @@
 		7EF5E0012A0F000100000002 /* cowbell.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7EF5E0012A0F0001000000A2 /* cowbell.wav */; };
 		7EF5E0012A0F000100000003 /* state_script.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EF5E0012A0F0001000000A3 /* state_script.png */; };
 		7EF6F0012A10000100000001 /* HeadsUpGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF6F0012A100001000000A1 /* HeadsUpGame.swift */; };
+		A1C11F012FCC11F000000005 /* FormerDawgsClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = A1C11F012FCC11F000000001 /* FormerDawgsClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 7EF0A0042FCA100000000004;
 			remoteInfo = "KonnorDailyWatch Watch App";
+		};
+		A1C11F012FCC11F000000003 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A2B3C4D5E6F708190A0B010 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1C11F012FCC11F000000002;
+			remoteInfo = FormerDawgsClip;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -88,6 +96,17 @@
 				7EF0A0012FCA100000000001 /* KonnorDailyWatch Watch App.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1C11F012FCC11F000000006 /* Embed App Clips */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = AppClips;
+			dstSubfolderSpec = 16;
+			files = (
+				A1C11F012FCC11F000000005 /* FormerDawgsClip.app in Embed App Clips */,
+			);
+			name = "Embed App Clips";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -130,6 +149,7 @@
 		7EF5E0012A0F0001000000A2 /* cowbell.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = cowbell.wav; path = Resources/cowbell.wav; sourceTree = "<group>"; };
 		7EF5E0012A0F0001000000A3 /* state_script.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = state_script.png; path = Resources/state_script.png; sourceTree = "<group>"; };
 		7EF6F0012A100001000000A1 /* HeadsUpGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadsUpGame.swift; sourceTree = "<group>"; };
+		A1C11F012FCC11F000000001 /* FormerDawgsClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FormerDawgsClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -140,11 +160,19 @@
 			);
 			target = 7EBAEFAE2FC892E300AC5595 /* KonnorDailyWidgetExtension */;
 		};
+		A1C11F012FCC11F000000008 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A1C11F012FCC11F000000002 /* FormerDawgsClip */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7EBAEFB52FC892E300AC5595 /* KonnorDailyWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (7EBAEFC92FC892E400AC5595 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = KonnorDailyWidget; sourceTree = "<group>"; };
 		7EF0A0062FCA100000000006 /* KonnorDailyWatch Watch App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "KonnorDailyWatch Watch App"; sourceTree = "<group>"; };
+		A1C11F012FCC11F000000007 /* FormerDawgsClip */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A1C11F012FCC11F000000008 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = FormerDawgsClip; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +199,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1C11F012FCC11F00000000A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -180,6 +215,7 @@
 				1A2B3C4D5E6F708190A0B004 /* KonnorDaily */,
 				7EBAEFB52FC892E300AC5595 /* KonnorDailyWidget */,
 				7EF0A0062FCA100000000006 /* KonnorDailyWatch Watch App */,
+				A1C11F012FCC11F000000007 /* FormerDawgsClip */,
 				7EBAEFB02FC892E300AC5595 /* Frameworks */,
 				1A2B3C4D5E6F708190A0B005 /* Products */,
 			);
@@ -230,6 +266,7 @@
 				1A2B3C4D5E6F708190A0B001 /* KonnorDaily.app */,
 				7EBAEFAF2FC892E300AC5595 /* KonnorDailyWidgetExtension.appex */,
 				7EF0A0022FCA100000000002 /* KonnorDailyWatch Watch App.app */,
+				A1C11F012FCC11F000000001 /* FormerDawgsClip.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -255,12 +292,14 @@
 				1A2B3C4D5E6F708190A0B009 /* Resources */,
 				7EBAEFC62FC892E400AC5595 /* Embed Foundation Extensions */,
 				7EF0A0052FCA100000000005 /* Embed Watch Content */,
+				A1C11F012FCC11F000000006 /* Embed App Clips */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				7EBAEFC42FC892E400AC5595 /* PBXTargetDependency */,
 				7EF0A0072FCA100000000007 /* PBXTargetDependency */,
+				A1C11F012FCC11F000000004 /* PBXTargetDependency */,
 			);
 			name = KonnorDaily;
 			productName = KonnorDaily;
@@ -311,6 +350,28 @@
 			productReference = 7EF0A0022FCA100000000002 /* KonnorDailyWatch Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A1C11F012FCC11F000000002 /* FormerDawgsClip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1C11F012FCC11F00000000C /* Build configuration list for PBXNativeTarget "FormerDawgsClip" */;
+			buildPhases = (
+				A1C11F012FCC11F000000009 /* Sources */,
+				A1C11F012FCC11F00000000A /* Frameworks */,
+				A1C11F012FCC11F00000000B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A1C11F012FCC11F000000007 /* FormerDawgsClip */,
+			);
+			name = FormerDawgsClip;
+			packageProductDependencies = (
+			);
+			productName = FormerDawgsClip;
+			productReference = A1C11F012FCC11F000000001 /* FormerDawgsClip.app */;
+			productType = "com.apple.product-type.application.on-demand-install-capable";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -349,6 +410,9 @@
 					7EF0A0042FCA100000000004 = {
 						CreatedOnToolsVersion = 26.5;
 					};
+					A1C11F012FCC11F000000002 = {
+						CreatedOnToolsVersion = 26.5;
+					};
 				};
 			};
 			buildConfigurationList = 1A2B3C4D5E6F708190A0B011 /* Build configuration list for PBXProject "KonnorDaily" */;
@@ -367,6 +431,7 @@
 				1A2B3C4D5E6F708190A0B006 /* KonnorDaily */,
 				7EBAEFAE2FC892E300AC5595 /* KonnorDailyWidgetExtension */,
 				7EF0A0042FCA100000000004 /* KonnorDailyWatch Watch App */,
+				A1C11F012FCC11F000000002 /* FormerDawgsClip */,
 			);
 		};
 /* End PBXProject section */
@@ -390,6 +455,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		7EF0A00B2FCA10000000000B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1C11F012FCC11F00000000B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -454,6 +526,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1C11F012FCC11F000000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -466,6 +545,11 @@
 			isa = PBXTargetDependency;
 			target = 7EF0A0042FCA100000000004 /* KonnorDailyWatch Watch App */;
 			targetProxy = 7EF0A0032FCA100000000003 /* PBXContainerItemProxy */;
+		};
+		A1C11F012FCC11F000000004 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1C11F012FCC11F000000002 /* FormerDawgsClip */;
+			targetProxy = A1C11F012FCC11F000000003 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -782,6 +866,72 @@
 			};
 			name = Release;
 		};
+		A1C11F012FCC11F00000000D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FormerDawgsClip/FormerDawgsClip.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 14;
+				DEVELOPMENT_TEAM = AQUAAP25CQ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FormerDawgsClip/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Former Dawgs";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.Clip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A1C11F012FCC11F00000000E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FormerDawgsClip/FormerDawgsClip.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 14;
+				DEVELOPMENT_TEAM = AQUAAP25CQ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FormerDawgsClip/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Former Dawgs";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwdawg.formerdawgs.Clip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -817,6 +967,15 @@
 			buildConfigurations = (
 				7EF0A00C2FCA10000000000C /* Debug */,
 				7EF0A00D2FCA10000000000D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1C11F012FCC11F00000000C /* Build configuration list for PBXNativeTarget "FormerDawgsClip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1C11F012FCC11F00000000D /* Debug */,
+				A1C11F012FCC11F00000000E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
