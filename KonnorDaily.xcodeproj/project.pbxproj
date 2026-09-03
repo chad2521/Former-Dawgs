@@ -22,6 +22,7 @@
 		7E0D50012A11000100000005 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */; };
 		7E0D50012A11000100000006 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */; };
 		7E3A77EA302AB0C100B3E49B /* YouTubeHighlightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E3A77E9302AB0C100B3E49B /* YouTubeHighlightService.swift */; };
+		7E3A88F2302AB0C200B3E49B /* XVideoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E3A88F1302AB0C200B3E49B /* XVideoService.swift */; };
 		7E47326E2FB4A42D003CB8BE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47326D2FB4A42C003CB8BE /* Theme.swift */; };
 		7E4732702FB4A42F003CB8BE /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E47326F2FB4A42F003CB8BE /* SharedComponents.swift */; };
 		7E4732722FB4A430003CB8BE /* PlayerSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4732712FB4A430003CB8BE /* PlayerSelectorView.swift */; };
@@ -124,6 +125,7 @@
 		7E38EDB12FF4A16B00EF0B00 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
 		7E0D50012A110001000000A1 /* GameDayScheduleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDayScheduleService.swift; sourceTree = "<group>"; };
 		7E3A77E9302AB0C100B3E49B /* YouTubeHighlightService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubeHighlightService.swift; sourceTree = "<group>"; };
+		7E3A88F1302AB0C200B3E49B /* XVideoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XVideoService.swift; sourceTree = "<group>"; };
 		7E47326D2FB4A42C003CB8BE /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		7E47326F2FB4A42F003CB8BE /* SharedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedComponents.swift; sourceTree = "<group>"; };
 		7E4732712FB4A430003CB8BE /* PlayerSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSelectorView.swift; sourceTree = "<group>"; };
@@ -256,6 +258,7 @@
 				7EF5E0012A0F0001000000A1 /* CowbellScreen.swift */,
 				7EF6F0012A100001000000A1 /* HeadsUpGame.swift */,
 				7E3A77E9302AB0C100B3E49B /* YouTubeHighlightService.swift */,
+				7E3A88F1302AB0C200B3E49B /* XVideoService.swift */,
 			);
 			path = KonnorDaily;
 			sourceTree = "<group>";
@@ -478,6 +481,7 @@
 				1A2B3C4D5E6F708190A0B0C1 /* KonnorDailyApp.swift in Sources */,
 				1A2B3C4D5E6F708190A0B0C2 /* ContentView.swift in Sources */,
 				7E3A77EA302AB0C100B3E49B /* YouTubeHighlightService.swift in Sources */,
+				7E3A88F2302AB0C200B3E49B /* XVideoService.swift in Sources */,
 				7E4732742FB4A431003CB8BE /* HomeSections.swift in Sources */,
 				7E9712E42FF5E88400229F02 /* BrowseScreen.swift in Sources */,
 				7EA237152FDF23CF008DB35A /* DawgLiveActivityManager.swift in Sources */,

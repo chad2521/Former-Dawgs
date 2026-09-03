@@ -13,13 +13,24 @@ final class StoriesService {
     }
 
     func fetchHighlights(for player: PlayerCatalogEntry) async -> [HighlightVideo] {
-        if let best = await YouTubeHighlightService().bestHighlight(
+        async let youtube = YouTubeHighlightService().bestHighlight(
             for: player.displayName,
             preferPitching: player.kind == .pitcher
-        ) {
-            return [best]
+        )
+        async let xVideos = XVideoService().videos(for: player.displayName)
+
+        var merged: [HighlightVideo] = []
+        var seenURLs = Set<URL>()
+
+        if let best = await youtube, seenURLs.insert(best.url).inserted {
+            merged.append(best)
         }
-        return []
+        for video in await xVideos {
+            if seenURLs.insert(video.url).inserted {
+                merged.append(video)
+            }
+        }
+        return merged
     }
 
     /// League-wide MLB/MiLB transactions for the whole roster (a few HTTP calls).

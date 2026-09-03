@@ -309,14 +309,27 @@ struct HighlightsSection: View {
 
     /// The best validated highlight resolved from the YouTube Data API.
     @State private var resolvedVideo: HighlightVideo?
+    /// Curated X (Twitter) video posts or search deep links.
+    @State private var xVideos: [HighlightVideo] = []
     @State private var isResolvingVideo = false
 
     private var links: [(String, String, URL)] {
         let query = player.displayName.replacingOccurrences(of: " ", with: "+")
+        let xSearch = XVideoService().searchURL(for: player.displayName)
         return [
             ("MLB Player Page", "Stats, video, and transactions", URL(string: "https://www.mlb.com/player/\(player.id)")!),
-            ("YouTube Search", "More highlights and clips", URL(string: "https://www.youtube.com/results?search_query=\(query)+Mississippi+State+highlights")!)
+            ("YouTube Search", "More highlights and clips", URL(string: "https://www.youtube.com/results?search_query=\(query)+Mississippi+State+highlights")!),
+            ("Videos on X", "Clips and highlights on X", xSearch)
         ]
+    }
+
+    /// Dashboard videos minus anything already shown as the top YouTube highlight
+    /// or in the dedicated X rows (avoids duplicate links).
+    private var remainingVideos: [HighlightVideo] {
+        var seen = Set<URL>()
+        if let resolvedVideo { seen.insert(resolvedVideo.url) }
+        for video in xVideos { seen.insert(video.url) }
+        return videos.filter { seen.insert($0.url).inserted }
     }
 
     var body: some View {
@@ -325,12 +338,22 @@ struct HighlightsSection: View {
 
             topHighlight
 
-            if videos.isEmpty {
+            ForEach(xVideos) { video in
+                Link(destination: video.url) {
+                    RowLink(
+                        title: video.title,
+                        subtitle: [video.source, video.publishedText].filter { !$0.isEmpty }.joined(separator: " \u{2022} "),
+                        systemImage: "play.circle.fill"
+                    )
+                }
+            }
+
+            if remainingVideos.isEmpty && resolvedVideo == nil && xVideos.isEmpty && !isResolvingVideo {
                 Text("No recent direct highlight links found.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(videos) { video in
+                ForEach(remainingVideos) { video in
                     Link(destination: video.url) {
                         RowLink(
                             title: video.title,
@@ -375,18 +398,25 @@ struct HighlightsSection: View {
         }
     }
 
-    /// Queries the YouTube Data API for the best playable highlight for this player.
+    /// Queries YouTube for the best playable highlight and X for video posts /
+    /// curated search links for this player.
     private func resolveHighlight() async {
         resolvedVideo = nil
+        xVideos = []
         isResolvingVideo = true
         defer { isResolvingVideo = false }
 
-        let best = await YouTubeHighlightService().bestHighlight(
+        async let youtube = YouTubeHighlightService().bestHighlight(
             for: player.displayName,
             preferPitching: player.kind == .pitcher
         )
+        async let x = XVideoService().videos(for: player.displayName)
+
+        let best = await youtube
+        let fromX = await x
         guard !Task.isCancelled else { return }
         resolvedVideo = best
+        xVideos = fromX
     }
 }
 

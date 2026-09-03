@@ -119,34 +119,43 @@ struct HomePlayerCard: View {
     }
 
     /// Shows the validated best highlight once resolved, a loading state while
-    /// querying YouTube, and a plain search link as a fallback.
+    /// querying YouTube, a plain search link as a fallback, plus a compact
+    /// secondary "Videos on X" deep link.
     @ViewBuilder
     private func highlightLink(for dashboard: PlayerDashboard) -> some View {
-        if let video = resolvedVideo {
-            Link(destination: video.url) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Label("Watch top highlight", systemImage: "play.rectangle.fill")
+        VStack(alignment: .leading, spacing: 8) {
+            if let video = resolvedVideo {
+                Link(destination: video.url) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label("Watch top highlight", systemImage: "play.rectangle.fill")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(Color.msMaroon)
+                        Text(video.title)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+            } else if isResolvingVideo {
+                HStack(spacing: 6) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Finding best highlight\u{2026}")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            } else if let searchURL = youTubeHighlightsURL(for: dashboard) {
+                Link(destination: searchURL) {
+                    Label("Search highlights on YouTube", systemImage: "magnifyingglass")
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(Color.msMaroon)
-                    Text(video.title)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
                 }
             }
-        } else if isResolvingVideo {
-            HStack(spacing: 6) {
-                ProgressView()
-                    .controlSize(.small)
-                Text("Finding best highlight\u{2026}")
-                    .font(.footnote)
+
+            Link(destination: XVideoService().searchURL(for: dashboard.name)) {
+                Label("Videos on X", systemImage: "play.circle")
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
-            }
-        } else if let searchURL = youTubeHighlightsURL(for: dashboard) {
-            Link(destination: searchURL) {
-                Label("Search highlights on YouTube", systemImage: "magnifyingglass")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(Color.msMaroon)
             }
         }
     }
