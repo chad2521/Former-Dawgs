@@ -120,7 +120,7 @@ struct HomePlayerCard: View {
 
     /// Shows the validated best highlight once resolved, a loading state while
     /// querying YouTube, a plain search link as a fallback, plus a compact
-    /// secondary "Videos on X" deep link.
+    /// secondary free curated "Videos on X" deep link (no X API).
     @ViewBuilder
     private func highlightLink(for dashboard: PlayerDashboard) -> some View {
         VStack(alignment: .leading, spacing: 8) {
